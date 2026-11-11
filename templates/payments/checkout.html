@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - {{ plan.name }} - StreamFlix{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 650px;">
+    <div class="card bg-dark border-secondary p-4 p-md-5 rounded shadow">
+        <div class="text-center mb-4">
+            <span class="badge bg-danger text-uppercase px-3 py-2 mb-2">Order Summary</span>
+            <h2 class="fw-bold text-light">Complete Your Subscription</h2>
+            <p class="text-secondary small">You are subscribing to <strong>{{ plan.name }}</strong></p>
+        </div>
+
+        <div class="p-3 rounded mb-4" style="background-color: #1a1a1a; border: 1px solid #333;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-light fw-bold">{{ plan.name }}</span>
+                <span class="text-light fw-bold">₹{{ plan.price }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center text-secondary small mb-2">
+                <span>Billing Cycle:</span>
+                <span>{{ plan.get_duration_type_display }} ({{ plan.duration_days }} Days)</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center text-secondary small mb-2">
+                <span>Streaming Quality:</span>
+                <span>{{ plan.max_quality }}</span>
+            </div>
+            <div class="border-top border-dark pt-2 mt-2 d-flex justify-content-between align-items-center">
+                <span class="text-light fw-bold">Total Amount:</span>
+                <span class="text-danger fw-bold fs-4">₹{{ plan.price }}</span>
+            </div>
+        </div>
+
+        <!-- Razorpay Checkout Form -->
+        <form action="{% url 'payments:verify' %}" method="POST" id="razorpayForm">
+            {% csrf_token %}
+            <input type="hidden" name="razorpay_order_id" id="rzp_order_id" value="{{ razorpay_order_id }}">
+            <input type="hidden" name="razorpay_payment_id" id="rzp_payment_id" value="">
+            <input type="hidden" name="razorpay_signature" id="rzp_signature" value="">
+
+            <button type="button" id="payBtn" class="btn btn-netflix w-100 py-3 fs-6 fw-bold mb-3">
+                <i class="fa-solid fa-lock me-2"></i>Pay ₹{{ plan.price }} via Razorpay
+            </button>
+
+            <!-- Test Mode Auto-Complete Simulation Button -->
+            <button type="button" id="simulateSuccessBtn" class="btn btn-outline-secondary w-100 py-2 btn-sm">
+                <i class="fa-solid fa-vial me-2"></i>Simulate Instant Test Approval
+            </button>
+        </form>
+
+        <div class="text-center text-secondary small mt-4">
+            <i class="fa-solid fa-lock text-success me-1"></i>256-Bit SSL Encrypted & Protected
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    const options = {
+        "key": "{{ razorpay_key }}",
+        "amount": "{{ amount_in_paise }}",
+        "currency": "INR",
+        "name": "StreamFlix OTT",
+        "description": "Subscription for {{ plan.name }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response){
+            document.getElementById('rzp_payment_id').value = response.razorpay_payment_id;
+            document.getElementById('rzp_signature').value = response.razorpay_signature;
+            document.getElementById('razorpayForm').submit();
+        },
+        "prefill": {
+            "name": "{{ request.user.get_full_name|default:request.user.username }}",
+            "email": "{{ request.user.email }}"
+        },
+        "theme": {
+            "color": "#E50914"
+        }
+    };
+
+    document.getElementById('payBtn').onclick = function(e){
+        try {
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response){
+                alert("Payment Failed: " + response.error.description);
+            });
+            rzp.open();
+        } catch(err) {
+            console.log("Razorpay script test fallback:", err);
+            // Fallback to test simulation
+            document.getElementById('simulateSuccessBtn').click();
+        }
+        e.preventDefault();
+    };
+
+    // Fast-track test approval for demo portfolios
+    document.getElementById('simulateSuccessBtn').onclick = function(){
+        document.getElementById('rzp_payment_id').value = "pay_simulated_" + Math.random().toString(36).substring(7);
+        document.getElementById('rzp_signature').value = "sig_simulated_valid";
+        document.getElementById('razorpayForm').submit();
+    };
+</script>
+{% endblock %}

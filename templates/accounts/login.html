@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In - StreamFlix{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-page {
+        min-height: calc(100vh - 180px);
+        background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(20,20,20,0.85) 100%),
+                    url('https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=1920&q=80') center center / cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+
+    .auth-card {
+        background: rgba(0, 0, 0, 0.78);
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 50px 40px;
+        width: 100%;
+        max-width: 440px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.9);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <h2 class="fw-bold text-light mb-4">Sign In</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label text-secondary small">Email or Username</label>
+                <input type="text" name="username" class="form-control bg-dark text-light border-secondary py-2" placeholder="admin or viewer" required autofocus>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label text-secondary small">Password</label>
+                <input type="password" name="password" class="form-control bg-dark text-light border-secondary py-2" placeholder="Your password" required>
+            </div>
+
+            <button type="submit" class="btn btn-netflix w-100 py-2 fs-6 mb-3">Sign In</button>
+
+            <div class="d-flex justify-content-between text-secondary small mb-4">
+                <div class="form-check">
+                    <input class="form-check-input bg-dark border-secondary" type="checkbox" id="rememberMe" checked>
+                    <label class="form-check-label" for="rememberMe">Remember me</label>
+                </div>
+                <a href="#" class="text-secondary text-decoration-none">Need help?</a>
+            </div>
+
+            <div class="border-top border-dark pt-3 text-secondary small">
+                New to StreamFlix? <a href="{% url 'accounts:register' %}" class="text-light fw-bold text-decoration-none">Sign up now</a>.
+                <div class="mt-2 text-muted" style="font-size: 0.75rem;">
+                    Demo Credentials:<br>
+                    Admin: <code>admin</code> / <code>admin123</code><br>
+                    Viewer: <code>viewer</code> / <code>viewer123</code>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}My Account - StreamFlix{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 900px;">
+    <div class="card bg-dark border-secondary p-4 p-md-5 rounded shadow">
+        <!-- Profile Header -->
+        <div class="d-flex flex-wrap align-items-center justify-content-between pb-4 border-bottom border-secondary mb-4 gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ request.user.username }}" alt="Avatar" width="70" height="70" class="rounded-circle border border-danger">
+                <div>
+                    <h3 class="fw-bold text-light mb-1">{{ request.user.get_full_name|default:request.user.username }}</h3>
+                    <div class="text-secondary small">{{ request.user.email }} &bull; Member since {{ request.user.date_joined|date:"M Y" }}</div>
+                </div>
+            </div>
+            <div>
+                <span class="badge bg-secondary text-uppercase px-3 py-2">{{ profile.get_role_display }}</span>
+            </div>
+        </div>
+
+        <!-- Membership & Subscription Card -->
+        <div class="card p-3 mb-4" style="background-color: #1a1a1a; border: 1px solid #333;">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <span class="text-secondary small text-uppercase fw-bold">Active Membership</span>
+                    {% if subscription and subscription.is_currently_valid %}
+                        <h4 class="text-warning fw-bold mt-1 mb-0"><i class="fa-solid fa-crown me-2"></i>{{ subscription.plan.name }}</h4>
+                        <div class="text-secondary small mt-1">Valid until {{ subscription.end_date|date:"F d, Y" }} &bull; Max Quality: {{ subscription.plan.max_quality }}</div>
+                    {% else %}
+                        <h5 class="text-light mt-1 mb-0">Free / No Active Paid Plan</h5>
+                        <div class="text-secondary small mt-1">Upgrade to watch 4K Ultra HD movies with no ads.</div>
+                    {% endif %}
+                </div>
+                <div>
+                    <a href="{% url 'subscriptions:plans' %}" class="btn btn-netflix btn-sm px-3">
+                        {% if subscription and subscription.is_currently_valid %}Manage Plan{% else %}Upgrade to Premium{% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+                <div class="p-3 rounded text-center" style="background-color: #222;">
+                    <div class="fs-3 fw-bold text-danger">{{ watchlist_count }}</div>
+                    <div class="text-secondary small">Items in Watchlist</div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="p-3 rounded text-center" style="background-color: #222;">
+                    <div class="fs-3 fw-bold text-success">{{ watched_count }}</div>
+                    <div class="text-secondary small">Completed Titles</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Edit Form -->
+        <h5 class="text-light fw-bold mb-3">Edit Profile Info</h5>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label text-secondary small">Phone Number</label>
+                {{ profile_form.phone }}
+            </div>
+            <div class="mb-4">
+                <label class="form-label text-secondary small">Bio & Movie Preferences</label>
+                {{ profile_form.bio }}
+            </div>
+            <button type="submit" class="btn btn-netflix btn-sm px-4">Save Changes</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

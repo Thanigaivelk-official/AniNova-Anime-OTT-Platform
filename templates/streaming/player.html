@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watching: {{ title }} - StreamFlix</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- HLS.js for Adaptive Bitrate Streaming -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .player-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Top Overlay Header */
+        .player-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 24px 30px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, transparent 100%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 50;
+            transition: opacity 0.4s ease;
+        }
+
+        .back-btn {
+            color: #fff;
+            font-size: 1.5rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.08);
+            color: #fff;
+        }
+
+        .player-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        }
+
+        .badge-live {
+            background-color: #E50914;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-wrapper" id="playerWrap">
+        <!-- Top Overlay Header -->
+        <div class="player-header" id="playerHeader">
+            <a href="{% url 'movies:movie_detail' movie.slug %}" class="back-btn" title="Back to Details">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <span class="player-title">{{ title }}</span>
+                {% if is_hls %}<span class="badge-live">HLS ADAPTIVE</span>{% endif %}
+            </div>
+        </div>
+
+        <!-- Video Element -->
+        <video id="videoPlayer" controls autoplay playsinline preload="auto">
+            {% if not is_hls %}
+                <source src="{{ stream_url }}" type="video/mp4">
+            {% endif %}
+            Your browser does not support HTML5 video streaming.
+        </video>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const header = document.getElementById('playerHeader');
+        const isHls = {{ is_hls|yesno:"true,false" }};
+        const streamUrl = "{{ stream_url }}";
+        const startTime = {{ start_time|default:0 }};
+        const contentType = "{{ content_type }}";
+        const contentId = {{ content_id }};
+
+        // 1. Setup HLS Adaptive Bitrate Streaming if stream is .m3u8
+        if (isHls && Hls.isSupported()) {
+            const hls = new Hls({
+                capLevelToPlayerSize: true,
+                autoStartLoad: true
+            });
+            hls.loadSource(streamUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                if (startTime > 0) {
+                    video.currentTime = startTime;
+                }
+                video.play();
+            });
+        } else if (startTime > 0) {
+            video.addEventListener('loadedmetadata', function() {
+                video.currentTime = startTime;
+            }, { once: true });
+        }
+
+        // 2. Hide top header when user is inactive
+        let hideTimer;
+        function showControls() {
+            header.style.opacity = '1';
+            clearTimeout(hideTimer);
+            hideTimer = setTimeout(() => {
+                if (!video.paused) {
+                    header.style.opacity = '0';
+                }
+            }, 3000);
+        }
+
+        document.addEventListener('mousemove', showControls);
+        video.addEventListener('play', showControls);
+        video.addEventListener('pause', () => { header.style.opacity = '1'; });
+
+        // 3. Automated Progress Tracking (Bookmark position every 5s)
+        function syncProgress() {
+            if (video.duration && !video.paused) {
+                fetch("{% url 'streaming:update_progress' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content_type: contentType,
+                        content_id: contentId,
+                        current_time: video.currentTime,
+                        duration: video.duration
+                    })
+                }).catch(err => console.debug('Sync progress silent fallback', err));
+            }
+        }
+
+        // Send progress every 6 seconds and upon pause
+        setInterval(syncProgress, 6000);
+        video.addEventListener('pause', syncProgress);
+    </script>
+</body>
+</html>

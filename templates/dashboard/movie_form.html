@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Add New Movie - StreamFlix Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 800px;">
+    <div class="card bg-dark border-secondary p-4 p-md-5 rounded shadow">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
+            <h3 class="fw-bold text-light mb-0"><i class="fa-solid fa-cloud-arrow-up text-danger me-2"></i>{{ action }}</h3>
+            <a href="{% url 'dashboard:movie_list' %}" class="btn btn-secondary btn-sm">&larr; Back to List</a>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label text-secondary small fw-bold">Title *</label>
+                <input type="text" name="title" class="form-control bg-dark text-light border-secondary" required placeholder="e.g. Inception 2">
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold">Content Type</label>
+                    <select name="content_type" class="form-select bg-dark text-light border-secondary">
+                        <option value="movie">Movie (Feature Film)</option>
+                        <option value="series">Web Series / TV Show</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold">Category</label>
+                    <select name="category" class="form-select bg-dark text-light border-secondary">
+                        <option value="">Select Category</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-secondary small fw-bold">Synopsis / Storyline *</label>
+                <textarea name="synopsis" rows="4" class="form-control bg-dark text-light border-secondary" required placeholder="Detailed plot summary..."></textarea>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label text-secondary small fw-bold">Release Year</label>
+                    <input type="number" name="release_year" class="form-control bg-dark text-light border-secondary" value="2024">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-secondary small fw-bold">Duration (Minutes)</label>
+                    <input type="number" name="duration_minutes" class="form-control bg-dark text-light border-secondary" value="120">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-secondary small fw-bold">Language</label>
+                    <input type="text" name="language" class="form-control bg-dark text-light border-secondary" value="English">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-secondary small fw-bold">Age Rating</label>
+                <select name="age_rating" class="form-select bg-dark text-light border-secondary">
+                    <option value="U">Universal (All Ages)</option>
+                    <option value="U/A 7+">Parental Guidance 7+</option>
+                    <option value="U/A 13+" selected>Parental Guidance 13+</option>
+                    <option value="U/A 16+">Parental Guidance 16+</option>
+                    <option value="A">Adults Only 18+</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-secondary small fw-bold">Genres (Hold Ctrl / Cmd to select multiple)</label>
+                <select name="genres" multiple class="form-select bg-dark text-light border-secondary" style="height: 120px;">
+                    {% for g in genres %}
+                        <option value="{{ g.id }}">{{ g.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold">Vertical Poster Image</label>
+                    <input type="file" name="poster" class="form-control bg-dark text-light border-secondary">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold">Horizontal Backdrop Image</label>
+                    <input type="file" name="backdrop" class="form-control bg-dark text-light border-secondary">
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-4 p-3 rounded mb-4" style="background-color: #1a1a1a;">
+                <div class="form-check">
+                    <input class="form-check-input bg-dark border-secondary" type="checkbox" name="is_featured" id="chkFeatured">
+                    <label class="form-check-label text-light small" for="chkFeatured">Featured in Hero Spotlight</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input bg-dark border-secondary" type="checkbox" name="is_trending" id="chkTrending" checked>
+                    <label class="form-check-label text-light small" for="chkTrending">Trending Section</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input bg-dark border-secondary" type="checkbox" name="is_premium" id="chkPremium" checked>
+                    <label class="form-check-label text-light small" for="chkPremium">Premium (Requires Paid Plan)</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-netflix py-2 px-4 fw-bold">Save and Publish Title</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

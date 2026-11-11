@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - StreamFlix Control Center{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        background-color: #1a1a1a;
+        border: 1px solid #2d2d2d;
+        border-radius: 10px;
+        padding: 20px;
+        transition: transform 0.2s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+    }
+    .table-dark-custom {
+        --bs-table-bg: #181818;
+        --bs-table-border-color: #2c2c2c;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-5" style="margin-top: 10px;">
+    <!-- Dashboard Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-light mb-1"><i class="fa-solid fa-gauge-high text-danger me-2"></i>Executive Control Center</h2>
+            <p class="text-secondary small mb-0">Platform performance, streaming analytics, subscriber metrics, and catalog operations.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'dashboard:movie_create' %}" class="btn btn-netflix btn-sm px-3">
+                <i class="fa-solid fa-plus me-1"></i>Add New Movie / Series
+            </a>
+            <a href="{% url 'dashboard:movie_list' %}" class="btn btn-secondary-netflix btn-sm px-3">
+                <i class="fa-solid fa-film me-1"></i>Manage Catalog
+            </a>
+            <a href="/admin/" target="_blank" class="btn btn-outline-secondary btn-sm px-3">
+                <i class="fa-solid fa-gear me-1"></i>Django Admin
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 Key Stat Metrics -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 mb-4">
+        <div class="col">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-secondary small text-uppercase fw-bold">Total Platform Users</div>
+                        <h2 class="fw-bold text-light mt-1 mb-0">{{ total_users }}</h2>
+                    </div>
+                    <div class="p-3 bg-dark rounded text-primary fs-3"><i class="fa-solid fa-users"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-secondary small text-uppercase fw-bold">Catalog Titles</div>
+                        <h2 class="fw-bold text-light mt-1 mb-0">{{ total_movies }}</h2>
+                    </div>
+                    <div class="p-3 bg-dark rounded text-danger fs-3"><i class="fa-solid fa-film"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-secondary small text-uppercase fw-bold">Active VIP Subscribers</div>
+                        <h2 class="fw-bold text-light mt-1 mb-0">{{ active_subscriptions }}</h2>
+                    </div>
+                    <div class="p-3 bg-dark rounded text-warning fs-3"><i class="fa-solid fa-crown"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-secondary small text-uppercase fw-bold">Total Revenue</div>
+                        <h2 class="fw-bold text-success mt-1 mb-0">₹{{ total_revenue|floatformat:2 }}</h2>
+                    </div>
+                    <div class="p-3 bg-dark rounded text-success fs-3"><i class="fa-solid fa-wallet"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables Row: Recent Payments & Recent Signups -->
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card bg-dark border-secondary p-3 rounded">
+                <h5 class="text-light fw-bold mb-3"><i class="fa-solid fa-receipt text-success me-2"></i>Recent Payment Transactions</h5>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover table-dark-custom align-middle small mb-0">
+                        <thead>
+                            <tr class="text-secondary">
+                                <th>Order ID</th>
+                                <th>User</th>
+                                <th>Plan</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in recent_payments %}
+                                <tr>
+                                    <td><code>{{ p.razorpay_order_id|truncatechars:14 }}</code></td>
+                                    <td>{{ p.user.username }}</td>
+                                    <td>{{ p.plan.name }}</td>
+                                    <td class="text-light fw-bold">₹{{ p.amount }}</td>
+                                    <td>
+                                        {% if p.status == 'successful' %}
+                                            <span class="badge bg-success">Success</span>
+                                        {% elif p.status == 'created' %}
+                                            <span class="badge bg-secondary">Pending</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ p.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-secondary">{{ p.created_at|date:"M d, H:i" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="6" class="text-center text-secondary py-3">No payments recorded yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card bg-dark border-secondary p-3 rounded">
+                <h5 class="text-light fw-bold mb-3"><i class="fa-solid fa-user-plus text-primary me-2"></i>New User Signups</h5>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover table-dark-custom align-middle small mb-0">
+                        <thead>
+                            <tr class="text-secondary">
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in recent_users %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ u.username }}" width="28" height="28" class="rounded-circle">
+                                            <div>
+                                                <div class="text-light fw-bold">{{ u.username }}</div>
+                                                <div class="text-secondary" style="font-size: 0.72rem;">{{ u.email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-dark border border-secondary">{{ u.profile.role }}</span></td>
+                                    <td class="text-secondary">{{ u.date_joined|date:"M d, Y" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

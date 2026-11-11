@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}StreamFlix - Unlimited Movies, TV Series & Originals{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Banner Billboard */
+    .hero-billboard {
+        position: relative;
+        min-height: 80vh;
+        background: linear-gradient(77deg, rgba(0,0,0,.9) 0%, rgba(0,0,0,.7) 40%, transparent 85%),
+                    linear-gradient(180deg, transparent 60%, #141414 100%),
+                    url('https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat;
+        display: flex;
+        align-items: center;
+        padding: 120px 4% 80px;
+        margin-top: -85px;
+    }
+
+    .hero-content {
+        max-width: 650px;
+        z-index: 5;
+    }
+
+    .hero-badge {
+        font-size: 0.85rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: var(--netflix-red);
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+
+    .hero-title {
+        font-size: clamp(2.2rem, 5vw, 4rem);
+        font-weight: 900;
+        line-height: 1.1;
+        margin-bottom: 18px;
+        text-shadow: 2px 4px 12px rgba(0,0,0,0.8);
+    }
+
+    .hero-synopsis {
+        font-size: 1.05rem;
+        line-height: 1.5;
+        color: #d2d2d2;
+        margin-bottom: 24px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .hero-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .section-wrap {
+        padding: 0 4%;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Billboard Section -->
+{% if featured_movie %}
+<section class="hero-billboard">
+    <div class="hero-content">
+        <div class="hero-badge"><i class="fa-solid fa-fire me-1"></i>STREAMFLIX SPOTLIGHT</div>
+        <h1 class="hero-title">{{ featured_movie.title }}</h1>
+        <div class="hero-meta">
+            <span class="badge-age">{{ featured_movie.age_rating }}</span>
+            <span class="text-secondary">{{ featured_movie.release_year }}</span>
+            <span class="text-secondary">{{ featured_movie.duration_minutes }} min</span>
+            <span class="text-secondary">{{ featured_movie.language }}</span>
+            {% if featured_movie.is_premium %}
+                <span class="badge-premium"><i class="fa-solid fa-crown me-1"></i>PREMIUM</span>
+            {% endif %}
+        </div>
+        <p class="hero-synopsis">{{ featured_movie.synopsis }}</p>
+        <div class="hero-actions">
+            <a href="{% url 'streaming:play' featured_movie.slug %}" class="btn btn-netflix px-4 py-2 fs-6">
+                <i class="fa-solid fa-play me-2"></i>Play Now
+            </a>
+            <a href="{% url 'movies:movie_detail' featured_movie.slug %}" class="btn btn-secondary-netflix px-4 py-2 fs-6">
+                <i class="fa-solid fa-circle-info me-2"></i>More Info
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Continue Watching Row (Only if user has history) -->
+{% if continue_watching %}
+<div class="section-wrap" style="margin-top: -30px; position: relative; z-index: 20;">
+    <div class="movie-section-title">
+        <span><i class="fa-solid fa-clock-rotate-left text-danger me-2"></i>Continue Watching</span>
+    </div>
+    <div class="movie-carousel">
+        {% for item in continue_watching %}
+            {% with m=item.movie|default:item.episode.season.series %}
+            <a href="{% url 'streaming:play' m.slug %}" class="movie-card">
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=400&q=80" alt="{{ m.title }}" class="movie-card-img">
+                <div class="progress" style="height: 4px; border-radius: 0; background-color: #333;">
+                    <div class="progress-bar bg-danger" style="width: {{ item.progress_percentage }}%;"></div>
+                </div>
+                <div class="movie-card-overlay">
+                    <div class="movie-card-title">{{ m.title }}</div>
+                    <div class="movie-card-meta">
+                        <span>{{ item.progress_percentage }}% watched</span>
+                        <i class="fa-solid fa-circle-play text-danger"></i>
+                    </div>
+                </div>
+            </a>
+            {% endwith %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Trending Now Carousel -->
+<div class="section-wrap">
+    <div class="movie-section-title">
+        <span><i class="fa-solid fa-arrow-trend-up text-danger me-2"></i>Trending Now</span>
+        <a href="{% url 'movies:category_view' 'movies' %}" class="text-secondary small text-decoration-none">Explore All &rarr;</a>
+    </div>
+    <div class="movie-carousel">
+        {% for m in trending_movies %}
+            <a href="{% url 'movies:movie_detail' m.slug %}" class="movie-card">
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=400&q=80" alt="{{ m.title }}" class="movie-card-img">
+                <div class="movie-card-overlay">
+                    <div class="movie-card-title">{{ m.title }}</div>
+                    <div class="movie-card-meta">
+                        <span class="badge-age">{{ m.age_rating }}</span>
+                        <span>{{ m.release_year }}</span>
+                        {% if m.is_premium %}
+                            <span class="badge-premium">VIP</span>
+                        {% else %}
+                            <span class="text-success small fw-bold">FREE</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- StreamFlix Originals Carousel -->
+{% if originals %}
+<div class="section-wrap">
+    <div class="movie-section-title">
+        <span><i class="fa-solid fa-star text-warning me-2"></i>StreamFlix Originals</span>
+    </div>
+    <div class="movie-carousel">
+        {% for m in originals %}
+            <a href="{% url 'movies:movie_detail' m.slug %}" class="movie-card">
+                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80" alt="{{ m.title }}" class="movie-card-img">
+                <div class="movie-card-overlay">
+                    <div class="movie-card-title">{{ m.title }}</div>
+                    <div class="movie-card-meta">
+                        <span class="badge-age">{{ m.age_rating }}</span>
+                        <span>{{ m.duration_minutes }}m</span>
+                        <span class="badge-premium">ORIGINAL</span>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Binge-Worthy TV Series Carousel -->
+{% if web_series %}
+<div class="section-wrap">
+    <div class="movie-section-title">
+        <span><i class="fa-solid fa-tv text-danger me-2"></i>Binge-Worthy TV Series</span>
+        <a href="{% url 'movies:category_view' 'web-series' %}" class="text-secondary small text-decoration-none">Explore All &rarr;</a>
+    </div>
+    <div class="movie-carousel">
+        {% for m in web_series %}
+            <a href="{% url 'movies:movie_detail' m.slug %}" class="movie-card">
+                <img src="https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=400&q=80" alt="{{ m.title }}" class="movie-card-img">
+                <div class="movie-card-overlay">
+                    <div class="movie-card-title">{{ m.title }}</div>
+                    <div class="movie-card-meta">
+                        <span class="badge-age">{{ m.age_rating }}</span>
+                        <span>{{ m.seasons.count }} Season(s)</span>
+                        <span class="badge-premium">SERIES</span>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Top Movies Carousel -->
+<div class="section-wrap">
+    <div class="movie-section-title">
+        <span><i class="fa-solid fa-film text-danger me-2"></i>Top Movies</span>
+    </div>
+    <div class="movie-carousel">
+        {% for m in latest_movies %}
+            <a href="{% url 'movies:movie_detail' m.slug %}" class="movie-card">
+                <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=400&q=80" alt="{{ m.title }}" class="movie-card-img">
+                <div class="movie-card-overlay">
+                    <div class="movie-card-title">{{ m.title }}</div>
+                    <div class="movie-card-meta">
+                        <span class="badge-age">{{ m.age_rating }}</span>
+                        <span>{{ m.release_year }}</span>
+                        <span>{{ m.duration_minutes }}m</span>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
