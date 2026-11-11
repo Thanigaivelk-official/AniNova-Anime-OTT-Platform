@@ -1,22 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}Admin Dashboard - StreamFlix Control Center{% endblock %}
+{% block title %}AniNova Studio Admin - Executive Control Center{% endblock %}
 
 {% block extra_css %}
 <style>
     .stat-card {
-        background-color: #1a1a1a;
-        border: 1px solid #2d2d2d;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-purple);
         border-radius: 10px;
-        padding: 20px;
-        transition: transform 0.2s ease;
+        padding: 22px;
+        transition: transform 0.2s ease, border-color 0.2s ease;
     }
     .stat-card:hover {
         transform: translateY(-4px);
+        border-color: var(--aninova-purple);
     }
     .table-dark-custom {
-        --bs-table-bg: #181818;
-        --bs-table-border-color: #2c2c2c;
+        --bs-table-bg: #13121f;
+        --bs-table-border-color: #232039;
     }
 </style>
 {% endblock %}
@@ -26,15 +27,15 @@
     <!-- Dashboard Header -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h2 class="fw-bold text-light mb-1"><i class="fa-solid fa-gauge-high text-danger me-2"></i>Executive Control Center</h2>
-            <p class="text-secondary small mb-0">Platform performance, streaming analytics, subscriber metrics, and catalog operations.</p>
+            <h2 class="fw-bold text-light mb-1"><i class="fa-solid fa-gauge-high text-danger me-2"></i>AniNova Studio Control Center</h2>
+            <p class="text-secondary small mb-0">Anime simulcast monitoring, subscriber metrics, revenue streams, and studio catalog operations.</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{% url 'dashboard:movie_create' %}" class="btn btn-netflix btn-sm px-3">
-                <i class="fa-solid fa-plus me-1"></i>Add New Movie / Series
+            <a href="{% url 'dashboard:movie_create' %}" class="btn btn-aninova btn-sm px-3">
+                <i class="fa-solid fa-plus me-1"></i>Add New Anime Series / Film
             </a>
-            <a href="{% url 'dashboard:movie_list' %}" class="btn btn-secondary-netflix btn-sm px-3">
-                <i class="fa-solid fa-film me-1"></i>Manage Catalog
+            <a href="{% url 'dashboard:movie_list' %}" class="btn btn-secondary-aninova btn-sm px-3">
+                <i class="fa-solid fa-film me-1"></i>Manage Anime Catalog
             </a>
             <a href="/admin/" target="_blank" class="btn btn-outline-secondary btn-sm px-3">
                 <i class="fa-solid fa-gear me-1"></i>Django Admin
@@ -48,10 +49,10 @@
             <div class="stat-card">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-secondary small text-uppercase fw-bold">Total Platform Users</div>
+                        <div class="text-secondary small text-uppercase fw-bold">Active Otaku Community</div>
                         <h2 class="fw-bold text-light mt-1 mb-0">{{ total_users }}</h2>
                     </div>
-                    <div class="p-3 bg-dark rounded text-primary fs-3"><i class="fa-solid fa-users"></i></div>
+                    <div class="p-3 bg-dark rounded fs-3" style="color: var(--aninova-cyan);"><i class="fa-solid fa-users"></i></div>
                 </div>
             </div>
         </div>
@@ -59,10 +60,10 @@
             <div class="stat-card">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-secondary small text-uppercase fw-bold">Catalog Titles</div>
+                        <div class="text-secondary small text-uppercase fw-bold">Anime Catalog Titles</div>
                         <h2 class="fw-bold text-light mt-1 mb-0">{{ total_movies }}</h2>
                     </div>
-                    <div class="p-3 bg-dark rounded text-danger fs-3"><i class="fa-solid fa-film"></i></div>
+                    <div class="p-3 bg-dark rounded fs-3" style="color: var(--aninova-pink);"><i class="fa-solid fa-film"></i></div>
                 </div>
             </div>
         </div>
@@ -70,7 +71,7 @@
             <div class="stat-card">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-secondary small text-uppercase fw-bold">Active VIP Subscribers</div>
+                        <div class="text-secondary small text-uppercase fw-bold">Active VIP Otaku Passes</div>
                         <h2 class="fw-bold text-light mt-1 mb-0">{{ active_subscriptions }}</h2>
                     </div>
                     <div class="p-3 bg-dark rounded text-warning fs-3"><i class="fa-solid fa-crown"></i></div>
@@ -81,7 +82,7 @@
             <div class="stat-card">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-secondary small text-uppercase fw-bold">Total Revenue</div>
+                        <div class="text-secondary small text-uppercase fw-bold">Total Platform Revenue</div>
                         <h2 class="fw-bold text-success mt-1 mb-0">₹{{ total_revenue|floatformat:2 }}</h2>
                     </div>
                     <div class="p-3 bg-dark rounded text-success fs-3"><i class="fa-solid fa-wallet"></i></div>
@@ -93,15 +94,15 @@
     <!-- Tables Row: Recent Payments & Recent Signups -->
     <div class="row g-4">
         <div class="col-lg-7">
-            <div class="card bg-dark border-secondary p-3 rounded">
-                <h5 class="text-light fw-bold mb-3"><i class="fa-solid fa-receipt text-success me-2"></i>Recent Payment Transactions</h5>
+            <div class="card p-3 rounded" style="background-color: var(--bg-card); border: 1px solid var(--border-purple);">
+                <h5 class="text-light fw-bold mb-3"><i class="fa-solid fa-receipt text-success me-2"></i>Recent Otaku VIP Transactions</h5>
                 <div class="table-responsive">
                     <table class="table table-dark table-hover table-dark-custom align-middle small mb-0">
                         <thead>
                             <tr class="text-secondary">
                                 <th>Order ID</th>
-                                <th>User</th>
-                                <th>Plan</th>
+                                <th>Viewer</th>
+                                <th>Tier</th>
                                 <th>Amount</th>
                                 <th>Status</th>
                                 <th>Date</th>
@@ -135,8 +136,8 @@
         </div>
 
         <div class="col-lg-5">
-            <div class="card bg-dark border-secondary p-3 rounded">
-                <h5 class="text-light fw-bold mb-3"><i class="fa-solid fa-user-plus text-primary me-2"></i>New User Signups</h5>
+            <div class="card p-3 rounded" style="background-color: var(--bg-card); border: 1px solid var(--border-purple);">
+                <h5 class="text-light fw-bold mb-3"><i class="fa-solid fa-user-plus text-primary me-2"></i>New Otaku Registrations</h5>
                 <div class="table-responsive">
                     <table class="table table-dark table-hover table-dark-custom align-middle small mb-0">
                         <thead>
@@ -151,7 +152,7 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ u.username }}" width="28" height="28" class="rounded-circle">
+                                            <img src="{{ u.profile.avatar_url }}" width="30" height="30" class="rounded-circle" style="border: 1px solid var(--aninova-purple); object-fit: cover;">
                                             <div>
                                                 <div class="text-light fw-bold">{{ u.username }}</div>
                                                 <div class="text-secondary" style="font-size: 0.72rem;">{{ u.email }}</div>

@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watching: {{ title }} - StreamFlix</title>
+    <title>Watching: {{ title }} - AniNova</title>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Bootstrap 5 CSS for Episode Drawer Modal -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- HLS.js for Adaptive Bitrate Streaming -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
@@ -18,7 +20,7 @@
         }
 
         body {
-            background-color: #000;
+            background-color: #05040a;
             color: #fff;
             overflow: hidden;
             width: 100vw;
@@ -39,24 +41,24 @@
             object-fit: contain;
         }
 
-        /* Top Overlay Header */
+        /* Top Header Overlay */
         .player-header {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            padding: 24px 30px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, transparent 100%);
+            padding: 24px 35px;
+            background: linear-gradient(180deg, rgba(11, 10, 18, 0.92) 0%, transparent 100%);
             display: flex;
             align-items: center;
-            gap: 20px;
+            justify-content: space-between;
             z-index: 50;
             transition: opacity 0.4s ease;
         }
 
         .back-btn {
             color: #fff;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -64,30 +66,69 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-            transition: background 0.2s ease, transform 0.2s ease;
+            background: rgba(138, 43, 226, 0.25);
+            border: 1px solid rgba(138, 43, 226, 0.4);
+            transition: all 0.2s ease;
         }
 
         .back-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(138, 43, 226, 0.6);
             transform: scale(1.08);
             color: #fff;
         }
 
         .player-title {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 700;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.9);
         }
 
-        .badge-live {
-            background-color: #E50914;
-            color: white;
-            font-size: 0.75rem;
-            font-weight: bold;
-            padding: 2px 8px;
-            border-radius: 3px;
-            margin-left: 10px;
+        /* Skip Intro / Outro Floating Pill */
+        .skip-btn {
+            position: absolute;
+            bottom: 90px;
+            right: 35px;
+            background: rgba(19, 18, 31, 0.85);
+            color: #fff;
+            border: 2px solid #8A2BE2;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            z-index: 60;
+            display: none;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .skip-btn:hover {
+            background: #8A2BE2;
+            transform: scale(1.05);
+        }
+
+        /* Next Episode Autoplay Card */
+        .next-ep-card {
+            position: absolute;
+            bottom: 90px;
+            left: 35px;
+            background: rgba(19, 18, 31, 0.94);
+            border: 1px solid #8A2BE2;
+            padding: 16px 20px;
+            border-radius: 10px;
+            z-index: 60;
+            display: none;
+            max-width: 380px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.9);
+        }
+
+        .audio-sub-selector {
+            background: rgba(28, 26, 46, 0.8);
+            border: 1px solid #3c3760;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            padding: 4px 10px;
         }
     </style>
 </head>
@@ -95,12 +136,37 @@
     <div class="player-wrapper" id="playerWrap">
         <!-- Top Overlay Header -->
         <div class="player-header" id="playerHeader">
-            <a href="{% url 'movies:movie_detail' movie.slug %}" class="back-btn" title="Back to Details">
-                <i class="fa-solid fa-arrow-left"></i>
-            </a>
-            <div>
-                <span class="player-title">{{ title }}</span>
-                {% if is_hls %}<span class="badge-live">HLS ADAPTIVE</span>{% endif %}
+            <div class="d-flex align-items-center gap-3">
+                <a href="{% url 'movies:movie_detail' movie.slug %}" class="back-btn" title="Back to Anime Details">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <div class="player-title">{{ title }}</div>
+                    <div class="small text-secondary">{{ anime.studio_name }} &bull; {{ anime.japanese_title|default:"" }}</div>
+                </div>
+            </div>
+
+            <!-- In-Player Controls (Audio/Sub & Episode Drawer) -->
+            <div class="d-flex align-items-center gap-2">
+                <!-- Audio Selector -->
+                <select class="audio-sub-selector" id="audioToggle">
+                    <option value="jp">🇯🇵 Japanese (Original)</option>
+                    <option value="en">🇺🇸 English Dub</option>
+                </select>
+
+                <!-- Subtitle Selector -->
+                <select class="audio-sub-selector" id="subToggle">
+                    <option value="en">Sub: English</option>
+                    <option value="es">Sub: Español</option>
+                    <option value="hi">Sub: Hindi</option>
+                    <option value="off">Subtitles Off</option>
+                </select>
+
+                {% if season_episodes %}
+                    <button class="btn btn-sm btn-dark border border-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#episodesDrawer">
+                        <i class="fa-solid fa-list-ol me-1 text-warning"></i>Episodes
+                    </button>
+                {% endif %}
             </div>
         </div>
 
@@ -111,7 +177,56 @@
             {% endif %}
             Your browser does not support HTML5 video streaming.
         </video>
+
+        <!-- Dynamic Skip Intro (OP) Button -->
+        <button class="skip-btn" id="skipIntroBtn" onclick="skipOpening()">
+            <i class="fa-solid fa-forward-step me-2 text-warning"></i>Skip Opening
+        </button>
+
+        <!-- Dynamic Skip Outro (ED) Button -->
+        <button class="skip-btn" id="skipOutroBtn" onclick="skipEnding()">
+            <i class="fa-solid fa-forward-fast me-2 text-warning"></i>Skip Ending
+        </button>
+
+        <!-- Next Episode Autoplay Card -->
+        {% if next_episode %}
+            <div class="next-ep-card" id="nextEpCard">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-secondary small fw-bold text-uppercase">Up Next</span>
+                    <span class="badge bg-danger small" id="countdownLabel">Autoplay in 8s</span>
+                </div>
+                <div class="fw-bold text-light mb-2 text-truncate">{{ next_episode.title }}</div>
+                <a href="{% url 'streaming:play_episode' next_episode.id %}" class="btn btn-sm text-light w-100 fw-bold" style="background: linear-gradient(135deg, #8A2BE2 0%, #ff2a85 100%);">
+                    <i class="fa-solid fa-play me-1"></i>Play Episode {{ next_episode.episode_number }} Now
+                </a>
+            </div>
+        {% endif %}
     </div>
+
+    <!-- Episodes Drawer (Offcanvas) -->
+    {% if season_episodes %}
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="episodesDrawer" style="background-color: #13121f !important; border-left: 1px solid #232039;">
+        <div class="offcanvas-header border-bottom border-dark">
+            <h5 class="offcanvas-title fw-bold text-light"><i class="fa-solid fa-list-ol text-warning me-2"></i>Select Episode</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-3">
+            <div class="list-group list-group-flush">
+                {% for ep in season_episodes %}
+                    <a href="{% url 'streaming:play_episode' ep.id %}" class="list-group-item list-group-item-action text-light py-3 {% if episode and episode.id == ep.id %}active bg-purple{% endif %}" style="background-color: transparent; border-bottom: 1px solid #221f36;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">Episode {{ ep.episode_number }}: {{ ep.title }}</span>
+                            <span class="small text-secondary">{{ ep.duration_minutes }}m</span>
+                        </div>
+                        <div class="small text-secondary text-truncate mt-1">{{ ep.overview }}</div>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         const video = document.getElementById('videoPlayer');
@@ -122,18 +237,25 @@
         const contentType = "{{ content_type }}";
         const contentId = {{ content_id }};
 
-        // 1. Setup HLS Adaptive Bitrate Streaming if stream is .m3u8
+        const skipIntroStart = {{ skip_intro_start|default:90 }};
+        const skipIntroEnd = {{ skip_intro_end|default:180 }};
+        const skipOutroStart = {{ skip_outro_start|default:0 }};
+        const skipOutroEnd = {{ skip_outro_end|default:0 }};
+        const nextEpUrl = "{% if next_episode %}{% url 'streaming:play_episode' next_episode.id %}{% endif %}";
+
+        const skipIntroBtn = document.getElementById('skipIntroBtn');
+        const skipOutroBtn = document.getElementById('skipOutroBtn');
+        const nextEpCard = document.getElementById('nextEpCard');
+        let nextCountdown = 8;
+        let countdownInterval;
+
+        // 1. HLS / MP4 Setup
         if (isHls && Hls.isSupported()) {
-            const hls = new Hls({
-                capLevelToPlayerSize: true,
-                autoStartLoad: true
-            });
+            const hls = new Hls({ capLevelToPlayerSize: true });
             hls.loadSource(streamUrl);
             hls.attachMedia(video);
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                if (startTime > 0) {
-                    video.currentTime = startTime;
-                }
+                if (startTime > 0) video.currentTime = startTime;
                 video.play();
             });
         } else if (startTime > 0) {
@@ -142,41 +264,72 @@
             }, { once: true });
         }
 
-        // 2. Hide top header when user is inactive
-        let hideTimer;
-        function showControls() {
-            header.style.opacity = '1';
-            clearTimeout(hideTimer);
-            hideTimer = setTimeout(() => {
-                if (!video.paused) {
-                    header.style.opacity = '0';
+        // 2. Dynamic Skip Buttons & Autoplay Engine
+        video.addEventListener('timeupdate', function() {
+            const cur = video.currentTime;
+            const dur = video.duration;
+
+            // Skip Opening
+            if (skipIntroEnd > skipIntroStart && cur >= skipIntroStart && cur < skipIntroEnd) {
+                skipIntroBtn.style.display = 'block';
+            } else {
+                skipIntroBtn.style.display = 'none';
+            }
+
+            // Skip Ending
+            if (skipOutroEnd > skipOutroStart && cur >= skipOutroStart && cur < skipOutroEnd) {
+                skipOutroBtn.style.display = 'block';
+            } else {
+                skipOutroBtn.style.display = 'none';
+            }
+
+            // Next Episode Autoplay Trigger (surfaces within last 18 seconds of video)
+            if (nextEpUrl && dur > 30 && (dur - cur) <= 18) {
+                if (nextEpCard && nextEpCard.style.display !== 'block') {
+                    nextEpCard.style.display = 'block';
+                    startAutoplayCountdown();
                 }
-            }, 3000);
+            }
+        });
+
+        function skipOpening() {
+            video.currentTime = skipIntroEnd;
+            skipIntroBtn.style.display = 'none';
         }
 
-        document.addEventListener('mousemove', showControls);
-        video.addEventListener('play', showControls);
-        video.addEventListener('pause', () => { header.style.opacity = '1'; });
+        function skipEnding() {
+            video.currentTime = skipOutroEnd;
+            skipOutroBtn.style.display = 'none';
+        }
 
-        // 3. Automated Progress Tracking (Bookmark position every 5s)
+        function startAutoplayCountdown() {
+            if (countdownInterval) return;
+            countdownInterval = setInterval(() => {
+                nextCountdown--;
+                const label = document.getElementById('countdownLabel');
+                if (label) label.innerText = `Autoplay in ${nextCountdown}s`;
+                if (nextCountdown <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = nextEpUrl;
+                }
+            }, 1000);
+        }
+
+        // 3. Automated Progress Tracker
         function syncProgress() {
             if (video.duration && !video.paused) {
                 fetch("{% url 'streaming:update_progress' %}", {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         content_type: contentType,
                         content_id: contentId,
                         current_time: video.currentTime,
                         duration: video.duration
                     })
-                }).catch(err => console.debug('Sync progress silent fallback', err));
+                }).catch(e => console.debug(e));
             }
         }
-
-        // Send progress every 6 seconds and upon pause
         setInterval(syncProgress, 6000);
         video.addEventListener('pause', syncProgress);
     </script>

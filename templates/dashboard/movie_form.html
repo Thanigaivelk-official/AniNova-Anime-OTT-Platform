@@ -1,32 +1,82 @@
 {% extends 'base.html' %}
 
-{% block title %}Add New Movie - StreamFlix Admin{% endblock %}
+{% block title %}Add New Anime - AniNova Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-dropzone {
+        border: 2px dashed var(--aninova-purple);
+        background: rgba(138, 43, 226, 0.05);
+        border-radius: 10px;
+        padding: 24px;
+        text-align: center;
+        transition: all 0.2s ease;
+    }
+    .upload-dropzone:hover {
+        background: rgba(138, 43, 226, 0.12);
+        border-color: var(--aninova-pink);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5" style="max-width: 800px;">
-    <div class="card bg-dark border-secondary p-4 p-md-5 rounded shadow">
-        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
-            <h3 class="fw-bold text-light mb-0"><i class="fa-solid fa-cloud-arrow-up text-danger me-2"></i>{{ action }}</h3>
-            <a href="{% url 'dashboard:movie_list' %}" class="btn btn-secondary btn-sm">&larr; Back to List</a>
+<div class="container py-5" style="max-width: 900px;">
+    <div class="card p-4 p-md-5 rounded shadow" style="background-color: var(--bg-card); border: 1px solid var(--border-purple);">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-dark">
+            <div>
+                <h3 class="fw-bold text-light mb-1"><i class="fa-solid fa-cloud-arrow-up text-warning me-2"></i>{{ action }}</h3>
+                <p class="text-secondary small mb-0">Publish an anime series or feature film to AniNova.</p>
+            </div>
+            <a href="{% url 'dashboard:movie_list' %}" class="btn btn-secondary-aninova btn-sm">&larr; Back to Catalog</a>
         </div>
 
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="mb-3">
-                <label class="form-label text-secondary small fw-bold">Title *</label>
-                <input type="text" name="title" class="form-control bg-dark text-light border-secondary" required placeholder="e.g. Inception 2">
+
+            <!-- Title & Japanese Title -->
+            <div class="row g-3 mb-3">
+                <div class="col-md-7">
+                    <label class="form-label text-secondary small fw-bold">English / International Title *</label>
+                    <input type="text" name="title" class="form-control bg-dark text-light border-secondary" required placeholder="e.g. Demon Slayer: Kimetsu no Yaiba">
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label text-secondary small fw-bold">Japanese Title (Kanji / Romaji)</label>
+                    <input type="text" name="japanese_title" class="form-control bg-dark text-light border-secondary" placeholder="e.g. 鬼滅の刃">
+                </div>
             </div>
 
+            <!-- Studio & Director -->
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                    <label class="form-label text-secondary small fw-bold">Content Type</label>
-                    <select name="content_type" class="form-select bg-dark text-light border-secondary">
-                        <option value="movie">Movie (Feature Film)</option>
-                        <option value="series">Web Series / TV Show</option>
-                    </select>
+                    <label class="form-label text-secondary small fw-bold">Animation Studio *</label>
+                    <input type="text" name="studio_name" class="form-control bg-dark text-light border-secondary" required placeholder="e.g. Ufotable, MAPPA, Wit Studio, Madhouse" value="MAPPA">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label text-secondary small fw-bold">Category</label>
+                    <label class="form-label text-secondary small fw-bold">Chief Director</label>
+                    <input type="text" name="director" class="form-control bg-dark text-light border-secondary" placeholder="e.g. Hayao Miyazaki, Makoto Shinkai">
+                </div>
+            </div>
+
+            <!-- Content Type, Status & Category -->
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label text-secondary small fw-bold">Content Type</label>
+                    <select name="content_type" class="form-select bg-dark text-light border-secondary">
+                        <option value="series" selected>Anime Series (TV Broadcast)</option>
+                        <option value="movie">Anime Movie (Theatrical Feature)</option>
+                        <option value="ova">OVA / Special</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-secondary small fw-bold">Broadcast Status</label>
+                    <select name="status" class="form-select bg-dark text-light border-secondary">
+                        <option value="ongoing" selected>Ongoing / Airing Simulcast</option>
+                        <option value="completed">Completed</option>
+                        <option value="upcoming">Upcoming</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-secondary small fw-bold">Catalog Category</label>
                     <select name="category" class="form-select bg-dark text-light border-secondary">
                         <option value="">Select Category</option>
                         {% for cat in categories %}
@@ -36,73 +86,125 @@
                 </div>
             </div>
 
+            <!-- Synopsis -->
             <div class="mb-3">
-                <label class="form-label text-secondary small fw-bold">Synopsis / Storyline *</label>
+                <label class="form-label text-secondary small fw-bold">Storyline & Synopsis *</label>
                 <textarea name="synopsis" rows="4" class="form-control bg-dark text-light border-secondary" required placeholder="Detailed plot summary..."></textarea>
             </div>
 
+            <!-- Numbers / Metadata -->
             <div class="row g-3 mb-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label text-secondary small fw-bold">Release Year</label>
                     <input type="number" name="release_year" class="form-control bg-dark text-light border-secondary" value="2024">
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label text-secondary small fw-bold">Duration (Minutes)</label>
-                    <input type="number" name="duration_minutes" class="form-control bg-dark text-light border-secondary" value="120">
+                <div class="col-md-3">
+                    <label class="form-label text-secondary small fw-bold">Duration (Mins/Ep)</label>
+                    <input type="number" name="duration_minutes" class="form-control bg-dark text-light border-secondary" value="24">
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label text-secondary small fw-bold">Language</label>
-                    <input type="text" name="language" class="form-control bg-dark text-light border-secondary" value="English">
+                <div class="col-md-3">
+                    <label class="form-label text-secondary small fw-bold">IMDb / MAL Score</label>
+                    <input type="number" step="0.1" name="imdb_rating" class="form-control bg-dark text-light border-secondary" value="8.5">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-secondary small fw-bold">Age Rating</label>
+                    <select name="age_rating" class="form-select bg-dark text-light border-secondary">
+                        <option value="PG">PG - All Ages</option>
+                        <option value="PG-13" selected>PG-13 - Teens</option>
+                        <option value="R-17+">R-17+ - Mature</option>
+                        <option value="R+">R+ - Explicit</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label text-secondary small fw-bold">Age Rating</label>
-                <select name="age_rating" class="form-select bg-dark text-light border-secondary">
-                    <option value="U">Universal (All Ages)</option>
-                    <option value="U/A 7+">Parental Guidance 7+</option>
-                    <option value="U/A 13+" selected>Parental Guidance 13+</option>
-                    <option value="U/A 16+">Parental Guidance 16+</option>
-                    <option value="A">Adults Only 18+</option>
-                </select>
+            <!-- Audio & Subtitles -->
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold">Available Audio Tracks</label>
+                    <input type="text" name="audio_languages" class="form-control bg-dark text-light border-secondary" value="Japanese (Original), English Dub">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold">Available Subtitle Languages</label>
+                    <input type="text" name="subtitle_languages" class="form-control bg-dark text-light border-secondary" value="English, Spanish, Hindi, German, French">
+                </div>
             </div>
 
+            <!-- Genres Multi-Select -->
             <div class="mb-3">
-                <label class="form-label text-secondary small fw-bold">Genres (Hold Ctrl / Cmd to select multiple)</label>
-                <select name="genres" multiple class="form-select bg-dark text-light border-secondary" style="height: 120px;">
+                <label class="form-label text-secondary small fw-bold">Anime Genres (Hold Ctrl / Cmd to select multiple)</label>
+                <select name="genres" multiple class="form-select bg-dark text-light border-secondary" style="height: 130px;">
                     {% for g in genres %}
                         <option value="{{ g.id }}">{{ g.name }}</option>
                     {% endfor %}
                 </select>
             </div>
 
+            <!-- Media Files Upload Section -->
+            <h5 class="text-light fw-bold mt-4 mb-3"><i class="fa-solid fa-photo-film text-info me-2"></i>Media & Video Upload</h5>
+            
             <div class="row g-3 mb-4">
+                <!-- Vertical Poster -->
                 <div class="col-md-6">
-                    <label class="form-label text-secondary small fw-bold">Vertical Poster Image</label>
-                    <input type="file" name="poster" class="form-control bg-dark text-light border-secondary">
+                    <div class="upload-dropzone">
+                        <i class="fa-solid fa-image fs-2 mb-2 text-warning"></i>
+                        <div class="fw-bold text-light small mb-1">Anime Poster Image (2:3)</div>
+                        <input type="file" name="poster" class="form-control bg-dark text-light border-secondary form-control-sm mt-2" accept=".jpg,.jpeg,.png,.webp">
+                    </div>
                 </div>
+                <!-- Horizontal Backdrop -->
                 <div class="col-md-6">
-                    <label class="form-label text-secondary small fw-bold">Horizontal Backdrop Image</label>
-                    <input type="file" name="backdrop" class="form-control bg-dark text-light border-secondary">
+                    <div class="upload-dropzone">
+                        <i class="fa-solid fa-panorama fs-2 mb-2" style="color: var(--aninova-cyan);"></i>
+                        <div class="fw-bold text-light small mb-1">Hero Backdrop Art (16:9)</div>
+                        <input type="file" name="backdrop" class="form-control bg-dark text-light border-secondary form-control-sm mt-2" accept=".jpg,.jpeg,.png,.webp">
+                    </div>
                 </div>
             </div>
 
-            <div class="d-flex flex-wrap gap-4 p-3 rounded mb-4" style="background-color: #1a1a1a;">
+            <!-- Video File Upload (MP4 / MKV) -->
+            <div class="mb-4">
+                <div class="upload-dropzone" style="background: rgba(0, 229, 255, 0.05); border-color: var(--aninova-cyan);">
+                    <i class="fa-solid fa-video fs-1 mb-2" style="color: var(--aninova-cyan);"></i>
+                    <h6 class="fw-bold text-light mb-1">Upload Video Stream File (Episode 1 / Movie)</h6>
+                    <p class="text-secondary small mb-2">Upload MP4, MKV, or WEBM video. Automatically attached for instant playback.</p>
+                    <input type="file" name="video_file" class="form-control bg-dark text-light border-secondary mx-auto" style="max-width: 450px;" accept=".mp4,.mkv,.webm,.mov">
+                </div>
+            </div>
+
+            <!-- Curation Checkboxes -->
+            <div class="d-flex flex-wrap gap-4 p-3 rounded mb-4" style="background-color: #161426; border: 1px solid var(--border-purple);">
                 <div class="form-check">
                     <input class="form-check-input bg-dark border-secondary" type="checkbox" name="is_featured" id="chkFeatured">
-                    <label class="form-check-label text-light small" for="chkFeatured">Featured in Hero Spotlight</label>
+                    <label class="form-check-label text-light small" for="chkFeatured">Spotlight Hero Banner</label>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input bg-dark border-secondary" type="checkbox" name="is_trending" id="chkTrending" checked>
                     <label class="form-check-label text-light small" for="chkTrending">Trending Section</label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input bg-dark border-secondary" type="checkbox" name="is_premium" id="chkPremium" checked>
-                    <label class="form-check-label text-light small" for="chkPremium">Premium (Requires Paid Plan)</label>
+                    <input class="form-check-input bg-dark border-secondary" type="checkbox" name="is_popular" id="chkPopular" checked>
+                    <label class="form-check-label text-light small" for="chkPopular">Most Popular</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input bg-dark border-secondary" type="checkbox" name="is_premium" id="chkPremium">
+                    <label class="form-check-label text-light small" for="chkPremium">VIP Simulcast (Requires Paid Plan)</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input bg-dark border-secondary" type="checkbox" name="has_dub" id="chkDub" checked>
+                    <label class="form-check-label text-light small" for="chkDub">English Dub Available</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input bg-dark border-secondary" type="checkbox" name="has_sub" id="chkSub" checked>
+                    <label class="form-check-label text-light small" for="chkSub">Subtitles Available</label>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-netflix py-2 px-4 fw-bold">Save and Publish Title</button>
+            <!-- PROMINENT UPLOAD & PUBLISH BUTTON -->
+            <div class="text-center pt-2">
+                <button type="submit" class="btn btn-aninova py-3 px-5 fw-bold fs-5 shadow-lg w-100" style="letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-cloud-arrow-up me-2"></i>Upload Media & Publish Anime
+                </button>
+            </div>
         </form>
     </div>
 </div>

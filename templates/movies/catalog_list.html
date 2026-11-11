@@ -1,32 +1,29 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ title }} - StreamFlix{% endblock %}
+{% block title %}{{ title }} - AniNova Anime{% endblock %}
 
 {% block content %}
 <div class="container-fluid px-4 py-5" style="margin-top: 10px;">
     <div class="mb-4">
-        <h2 class="fw-bold text-light">{{ title }}</h2>
+        <h2 class="fw-bold text-light"><i class="fa-solid fa-masks-theater text-warning me-2"></i>{{ title }}</h2>
         {% if subtitle %}
             <p class="text-secondary small">{{ subtitle }}</p>
         {% endif %}
     </div>
 
-    {% if movies %}
+    {% if anime_list %}
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
-            {% for m in movies %}
+            {% for a in anime_list %}
                 <div class="col">
-                    <a href="{% url 'movies:movie_detail' m.slug %}" class="movie-card d-block" style="flex: auto;">
-                        <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=400&q=80" alt="{{ m.title }}" class="movie-card-img" style="height: 260px;">
-                        <div class="movie-card-overlay">
-                            <div class="movie-card-title">{{ m.title }}</div>
-                            <div class="movie-card-meta">
-                                <span class="badge-age">{{ m.age_rating }}</span>
-                                <span>{{ m.release_year }}</span>
-                                {% if m.is_premium %}
-                                    <span class="badge-premium">VIP</span>
-                                {% else %}
-                                    <span class="text-success small fw-bold">FREE</span>
-                                {% endif %}
+                    <a href="{% url 'movies:movie_detail' a.slug %}" class="anime-card d-block" style="flex: auto;">
+                        <img src="{{ a.display_poster }}" alt="{{ a.title }}" class="anime-card-img" style="height: 270px;">
+                        <div class="anime-card-overlay">
+                            <div class="anime-card-title">{{ a.title }}</div>
+                            <div class="anime-card-jp">{{ a.japanese_title|default:a.studio_name }}</div>
+                            <div class="anime-card-meta">
+                                <span class="badge-rating"><i class="fa-solid fa-star me-1"></i>{{ a.imdb_rating }}</span>
+                                <span class="badge-subdub">SUB &bull; DUB</span>
+                                {% if a.is_premium %}<span class="badge-vip">VIP</span>{% endif %}
                             </div>
                         </div>
                     </a>
@@ -36,8 +33,8 @@
     {% else %}
         <div class="text-center py-5">
             <i class="fa-solid fa-film text-secondary fs-1 mb-3"></i>
-            <h5 class="text-secondary">No titles match your criteria.</h5>
-            <a href="{% url 'movies:home' %}" class="btn btn-netflix btn-sm mt-3">Return to Home</a>
+            <h5 class="text-secondary">No anime found matching your criteria.</h5>
+            <a href="{% url 'movies:home' %}" class="btn btn-aninova btn-sm mt-3">Return to AniNova Home</a>
         </div>
     {% endif %}
 </div>

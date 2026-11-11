@@ -1,105 +1,128 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ movie.title }} - Watch Online on StreamFlix{% endblock %}
+{% block title %}{{ anime.title }} - AniNova Anime Streaming{% endblock %}
 
 {% block extra_css %}
 <style>
-    .detail-backdrop {
+    .anime-backdrop {
         position: relative;
         min-height: 65vh;
-        background: linear-gradient(0deg, #141414 0%, rgba(20,20,20,0.8) 60%, rgba(0,0,0,0.5) 100%),
-                    url('https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat;
+        background: linear-gradient(0deg, #0b0a12 0%, rgba(19, 18, 31, 0.85) 65%, rgba(0,0,0,0.5) 100%),
+                    url('{{ anime.display_backdrop }}') center center / cover no-repeat;
         display: flex;
         align-items: flex-end;
-        padding: 60px 4% 40px;
-        margin-top: -85px;
+        padding: 70px 4% 45px;
+        margin-top: -88px;
     }
 
     .detail-container {
         padding: 30px 4% 60px;
     }
 
+    .anime-poster-hero {
+        width: 220px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.9), 0 0 20px rgba(138, 43, 226, 0.4);
+        border: 2px solid var(--border-purple);
+    }
+
     .genre-tag {
-        background: #252525;
-        color: #ddd;
-        font-size: 0.8rem;
-        padding: 4px 12px;
+        background: rgba(28, 26, 46, 0.85);
+        color: #d1b3ff;
+        border: 1px solid var(--border-purple);
+        font-size: 0.82rem;
+        padding: 5px 14px;
         border-radius: 20px;
         text-decoration: none;
-        transition: background 0.2s ease;
+        transition: all 0.2s ease;
     }
 
     .genre-tag:hover {
-        background: #333;
+        background: var(--aninova-purple);
         color: #fff;
     }
 
     .episode-card {
-        background: #1c1c1c;
-        border-radius: 6px;
-        padding: 14px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-purple);
+        border-radius: 8px;
+        padding: 14px 18px;
         margin-bottom: 12px;
         display: flex;
         align-items: center;
         gap: 16px;
         text-decoration: none;
         color: inherit;
-        transition: background 0.2s ease, transform 0.2s ease;
+        transition: all 0.2s ease;
     }
 
     .episode-card:hover {
-        background: #282828;
+        background: var(--bg-card-hover);
+        border-color: var(--aninova-purple);
         transform: translateX(4px);
         color: inherit;
     }
 
     .review-bubble {
-        background: #1e1e1e;
+        background: var(--bg-card);
+        border: 1px solid var(--border-purple);
         border-radius: 8px;
         padding: 16px;
         margin-bottom: 14px;
-        border-left: 3px solid var(--netflix-red);
+        border-left: 3px solid var(--aninova-pink);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Movie Backdrop Hero -->
-<div class="detail-backdrop">
+<!-- Anime Backdrop Hero -->
+<div class="anime-backdrop">
     <div class="container-fluid px-0">
-        <div class="row align-items-end">
-            <div class="col-lg-8">
-                {% if movie.is_premium %}
-                    <span class="badge-premium mb-2 d-inline-block"><i class="fa-solid fa-crown me-1"></i>PREMIUM EXCLUSIVE</span>
+        <div class="row align-items-end g-4">
+            <div class="col-md-auto d-none d-md-block">
+                <img src="{{ anime.display_poster }}" alt="{{ anime.title }}" class="anime-poster-hero">
+            </div>
+            <div class="col-md">
+                {% if anime.is_premium %}
+                    <span class="badge-vip mb-2 d-inline-block"><i class="fa-solid fa-crown me-1"></i>OTAKU VIP SIMULCAST</span>
                 {% endif %}
-                <h1 class="display-4 fw-black text-white fw-bold mb-2">{{ movie.title }}</h1>
+                <h1 class="display-5 fw-bold text-white mb-1">{{ anime.title }}</h1>
+                {% if anime.japanese_title %}
+                    <h5 class="fw-semibold mb-3" style="color: var(--aninova-cyan);">{{ anime.japanese_title }}</h5>
+                {% endif %}
+
                 <div class="d-flex flex-wrap align-items-center gap-3 mb-3 text-secondary small">
-                    <span class="badge-age">{{ movie.age_rating }}</span>
-                    <span><i class="fa-solid fa-calendar me-1"></i>{{ movie.release_year }}</span>
-                    <span><i class="fa-solid fa-clock me-1"></i>{{ movie.duration_minutes }} minutes</span>
-                    <span><i class="fa-solid fa-language me-1"></i>{{ movie.language }}</span>
-                    <span><i class="fa-solid fa-star text-warning me-1"></i>{{ movie.average_rating }} / 5 ({{ reviews.count }} reviews)</span>
+                    <span class="badge bg-purple p-2 text-light" style="background-color: var(--aninova-purple);"><i class="fa-solid fa-paintbrush me-1"></i>{{ anime.studio_name }}</span>
+                    <span class="badge-rating"><i class="fa-solid fa-star text-warning me-1"></i>{{ anime.imdb_rating }} MAL</span>
+                    <span class="badge bg-dark border border-secondary text-uppercase">{{ anime.get_status_display }}</span>
+                    <span><i class="fa-solid fa-calendar me-1"></i>{{ anime.release_year }}</span>
+                    <span><i class="fa-solid fa-clock me-1"></i>{{ anime.duration_minutes }}m / episode</span>
+                    <span class="badge-subdub">SUB &bull; DUB</span>
                 </div>
+
+                <!-- Genre pills -->
                 <div class="d-flex flex-wrap gap-2 mb-4">
-                    {% for g in movie.genres.all %}
+                    {% for g in anime.genres.all %}
                         <a href="{% url 'movies:genre_view' g.slug %}" class="genre-tag">{{ g.name }}</a>
                     {% endfor %}
                 </div>
+
+                <!-- Actions -->
                 <div class="d-flex flex-wrap gap-3">
-                    <a href="{% url 'streaming:play' movie.slug %}" class="btn btn-netflix px-4 py-2 fs-6">
-                        <i class="fa-solid fa-play me-2"></i>Play Movie
+                    <a href="{% url 'streaming:play' anime.slug %}" class="btn btn-aninova px-4 py-2 fs-6">
+                        <i class="fa-solid fa-play me-2"></i>Start Streaming
                     </a>
 
                     <!-- Add/Remove Watchlist Form -->
-                    <form action="{% url 'watchlist:toggle' movie.id %}" method="POST" class="d-inline">
+                    <form action="{% url 'watchlist:toggle' anime.id %}" method="POST" class="d-inline">
                         {% csrf_token %}
                         {% if is_in_watchlist %}
-                            <button type="submit" class="btn btn-secondary-netflix px-4 py-2 fs-6">
-                                <i class="fa-solid fa-check text-success me-2"></i>In Watchlist
+                            <button type="submit" class="btn btn-secondary-aninova px-4 py-2 fs-6">
+                                <i class="fa-solid fa-check text-success me-2"></i>In Anime List
                             </button>
                         {% else %}
-                            <button type="submit" class="btn btn-secondary-netflix px-4 py-2 fs-6">
-                                <i class="fa-solid fa-plus me-2"></i>Add to Watchlist
+                            <button type="submit" class="btn btn-secondary-aninova px-4 py-2 fs-6">
+                                <i class="fa-solid fa-plus me-2"></i>Add to My List
                             </button>
                         {% endif %}
                     </form>
@@ -109,28 +132,51 @@
     </div>
 </div>
 
-<!-- Main Detail & Tabs Container -->
+<!-- Details & Episodes Container -->
 <div class="detail-container">
     <div class="row gy-5">
         <div class="col-lg-8">
-            <h5 class="text-light fw-bold mb-3">Storyline & Synopsis</h5>
-            <p class="text-secondary lead fs-6" style="line-height: 1.8;">{{ movie.synopsis }}</p>
+            <h5 class="text-light fw-bold mb-3"><i class="fa-solid fa-scroll me-2 text-warning"></i>Anime Synopsis</h5>
+            <p class="text-secondary lead fs-6" style="line-height: 1.8;">{{ anime.synopsis }}</p>
 
-            <!-- Episodes Section (If Series) -->
-            {% if movie.content_type == 'series' and seasons %}
+            <!-- Anime Production & Audio Specs Box -->
+            <div class="card p-3 my-4" style="background-color: var(--bg-card); border: 1px solid var(--border-purple);">
+                <div class="row g-3 small">
+                    <div class="col-sm-6">
+                        <span class="text-secondary">Chief Director:</span>
+                        <span class="text-light fw-bold ms-1">{{ anime.director|default:"Industry Masters" }}</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <span class="text-secondary">Studio:</span>
+                        <span class="text-light fw-bold ms-1">{{ anime.studio_name }}</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <span class="text-secondary">Available Audio:</span>
+                        <span class="text-light fw-bold ms-1">{{ anime.audio_languages }}</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <span class="text-secondary">Available Subtitles:</span>
+                        <span class="text-light fw-bold ms-1">{{ anime.subtitle_languages }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Episodes Section -->
+            {% if seasons %}
                 <div class="mt-5">
-                    <h5 class="text-light fw-bold mb-3"><i class="fa-solid fa-list-ol text-danger me-2"></i>Episodes</h5>
+                    <h5 class="text-light fw-bold mb-3"><i class="fa-solid fa-list-ol me-2" style="color: var(--aninova-pink);"></i>Episodes & Arcs</h5>
                     {% for season in seasons %}
                         <h6 class="text-secondary fw-bold mt-4 mb-3">{{ season.title }} ({{ season.episodes.count }} Episodes)</h6>
                         {% for ep in season.episodes.all %}
                             <a href="{% url 'streaming:play_episode' ep.id %}" class="episode-card">
-                                <div class="fs-4 fw-bold text-secondary px-2">{{ ep.episode_number }}</div>
+                                <div class="fs-4 fw-bold px-2" style="color: var(--aninova-purple);">{{ ep.episode_number }}</div>
                                 <div class="flex-grow-1">
                                     <div class="fw-bold text-light mb-1">{{ ep.title }}</div>
-                                    <div class="small text-secondary text-truncate" style="max-width: 500px;">{{ ep.overview }}</div>
+                                    <div class="small text-secondary text-truncate" style="max-width: 520px;">{{ ep.overview }}</div>
                                 </div>
+                                <div class="badge-subdub me-2">SUB/DUB</div>
                                 <div class="text-secondary small me-3">{{ ep.duration_minutes }}m</div>
-                                <i class="fa-solid fa-circle-play fs-4 text-danger"></i>
+                                <i class="fa-solid fa-circle-play fs-4 text-warning"></i>
                             </a>
                         {% endfor %}
                     {% endfor %}
@@ -140,39 +186,39 @@
             <!-- User Reviews Section -->
             <div class="mt-5">
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h5 class="text-light fw-bold mb-0"><i class="fa-solid fa-comments text-danger me-2"></i>User Reviews & Ratings</h5>
+                    <h5 class="text-light fw-bold mb-0"><i class="fa-solid fa-comments me-2" style="color: var(--aninova-cyan);"></i>Otaku Community Reviews</h5>
                 </div>
 
                 <!-- Add Review Form -->
                 {% if request.user.is_authenticated %}
-                <div class="card bg-dark border-secondary p-4 mb-4">
-                    <h6 class="text-light fw-bold mb-3">Write a Review</h6>
-                    <form action="{% url 'movies:add_review' movie.slug %}" method="POST">
+                <div class="card p-4 mb-4" style="background-color: var(--bg-card); border: 1px solid var(--border-purple);">
+                    <h6 class="text-light fw-bold mb-3">Leave a Review for {{ anime.title }}</h6>
+                    <form action="{% url 'movies:add_review' anime.slug %}" method="POST">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label class="form-label small text-secondary">Your Rating</label>
-                            <select name="rating" class="form-select bg-dark text-light border-secondary" style="max-width: 200px;">
+                            <label class="form-label small text-secondary">Star Rating</label>
+                            <select name="rating" class="form-select bg-dark text-light border-secondary" style="max-width: 220px;">
                                 <option value="5">⭐⭐⭐⭐⭐ 5 Stars - Masterpiece</option>
-                                <option value="4">⭐⭐⭐⭐ 4 Stars - Very Good</option>
-                                <option value="3">⭐⭐⭐ 3 Stars - Average</option>
-                                <option value="2">⭐⭐ 2 Stars - Below Average</option>
-                                <option value="1">⭐ 1 Star - Poor</option>
+                                <option value="4">⭐⭐⭐⭐ 4 Stars - Great Anime</option>
+                                <option value="3">⭐⭐⭐ 3 Stars - Good</option>
+                                <option value="2">⭐⭐ 2 Stars - Decent</option>
+                                <option value="1">⭐ 1 Star - Mediocre</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small text-secondary">Review Comments</label>
-                            <textarea name="comment" class="form-control bg-dark text-light border-secondary" rows="3" placeholder="Share your thoughts on the movie with the community..."></textarea>
+                            <label class="form-label small text-secondary">Review Notes</label>
+                            <textarea name="comment" class="form-control bg-dark text-light border-secondary" rows="3" placeholder="Animation quality, plot twists, OST impressions..."></textarea>
                         </div>
-                        <button type="submit" class="btn btn-netflix btn-sm px-4">Submit Review</button>
+                        <button type="submit" class="btn btn-aninova btn-sm px-4">Submit Review</button>
                     </form>
                 </div>
                 {% else %}
-                    <div class="p-3 bg-dark border border-secondary rounded mb-4 text-secondary small">
-                        Please <a href="{% url 'accounts:login' %}" class="text-danger fw-bold">Sign In</a> to write a review.
+                    <div class="p-3 border border-secondary rounded mb-4 text-secondary small" style="background-color: var(--bg-card);">
+                        Please <a href="{% url 'accounts:login' %}" class="fw-bold" style="color: var(--aninova-cyan);">Sign In</a> to rate this anime.
                     </div>
                 {% endif %}
 
-                <!-- Existing Reviews List -->
+                <!-- Existing Reviews -->
                 {% if reviews %}
                     {% for r in reviews %}
                         <div class="review-bubble">
@@ -185,23 +231,23 @@
                         </div>
                     {% endfor %}
                 {% else %}
-                    <p class="text-secondary small">No reviews yet. Be the first to review {{ movie.title }}!</p>
+                    <p class="text-secondary small">No reviews yet. Be the first to share your thoughts on {{ anime.title }}!</p>
                 {% endif %}
             </div>
         </div>
 
         <!-- Sidebar / Similar Recommendations -->
         <div class="col-lg-4">
-            <h5 class="text-light fw-bold mb-3"><i class="fa-solid fa-wand-magic-sparkles text-warning me-2"></i>More Like This</h5>
+            <h5 class="text-light fw-bold mb-3"><i class="fa-solid fa-wand-magic-sparkles text-warning me-2"></i>More Anime Like This</h5>
             <div class="row g-3">
-                {% for sim in similar_movies %}
+                {% for sim in similar_anime %}
                     <div class="col-6">
                         <a href="{% url 'movies:movie_detail' sim.slug %}" class="text-decoration-none">
-                            <div class="card bg-dark border-0 rounded overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=300&q=80" class="card-img-top" style="height: 180px; object-fit: cover;" alt="{{ sim.title }}">
+                            <div class="card border-0 rounded overflow-hidden" style="background-color: var(--bg-card); border: 1px solid var(--border-purple);">
+                                <img src="{{ sim.display_poster }}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="{{ sim.title }}">
                                 <div class="card-body p-2">
                                     <div class="text-light small fw-bold text-truncate">{{ sim.title }}</div>
-                                    <div class="text-secondary" style="font-size: 0.75rem;">{{ sim.release_year }} &bull; {{ sim.age_rating }}</div>
+                                    <div class="text-secondary" style="font-size: 0.75rem;">{{ sim.studio_name }} &bull; ⭐ {{ sim.imdb_rating }}</div>
                                 </div>
                             </div>
                         </a>

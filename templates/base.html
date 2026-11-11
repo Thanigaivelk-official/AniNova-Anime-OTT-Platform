@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}StreamFlix - Watch Movies & TV Shows Online{% endblock %}</title>
+    <title>{% block title %}AniNova - A New World of Anime{% endblock %}</title>
 
-    <!-- Google Fonts: Inter -->
+    <!-- Google Fonts: Space Grotesk & Outfit & Noto Sans JP -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,14 +17,18 @@
 
     <style>
         :root {
-            --bg-main: #141414;
-            --bg-card: #181818;
-            --bg-hover: #232323;
-            --netflix-red: #E50914;
-            --netflix-red-hover: #b80710;
-            --text-light: #ffffff;
-            --text-muted: #aaaaaa;
-            --border-dark: #2a2a2a;
+            --bg-body: #0b0a12;
+            --bg-card: #13121f;
+            --bg-card-hover: #1c1a2e;
+            --aninova-purple: #8A2BE2;
+            --aninova-purple-hover: #7322bf;
+            --aninova-pink: #ff2a85;
+            --aninova-cyan: #00e5ff;
+            --text-light: #f5f4fb;
+            --text-muted: #8e8b9f;
+            --border-purple: #232039;
+            --brand-gradient: linear-gradient(135deg, #8A2BE2 0%, #ff2a85 100%);
+            --badge-glow: 0 0 14px rgba(138, 43, 226, 0.45);
         }
 
         * {
@@ -34,85 +38,99 @@
         }
 
         body {
-            background-color: var(--bg-main);
+            background-color: var(--bg-body);
             color: var(--text-light);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             overflow-x: hidden;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        /* StreamFlix Navbar */
-        .sf-navbar {
-            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(20,20,20,0.7) 70%, transparent 100%);
-            transition: background-color 0.4s ease, padding 0.3s ease;
-            padding: 18px 4%;
+        /* AniNova Sticky Glass Navbar */
+        .ani-navbar {
+            background: linear-gradient(180deg, rgba(11, 10, 18, 0.98) 0%, rgba(19, 18, 31, 0.85) 80%, transparent 100%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+            padding: 16px 4%;
             z-index: 1050;
+            border-bottom: 1px solid rgba(138, 43, 226, 0.15);
         }
 
-        .sf-navbar.scrolled {
-            background-color: #141414 !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+        .ani-navbar.scrolled {
+            background: rgba(11, 10, 18, 0.97) !important;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.85), 0 1px 0 rgba(138, 43, 226, 0.3);
             padding: 12px 4%;
         }
 
-        .sf-brand {
+        .ani-brand {
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 1.85rem;
-            font-weight: 900;
-            color: var(--netflix-red) !important;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            font-weight: 800;
+            background: var(--brand-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
             text-decoration: none;
             display: flex;
             align-items: center;
+            gap: 8px;
         }
 
-        .sf-brand i {
-            margin-right: 8px;
+        .ani-brand-tagline {
+            font-size: 0.72rem;
+            color: var(--aninova-cyan);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-top: -4px;
         }
 
         .nav-link {
-            color: #e5e5e5 !important;
+            color: #ccc8e0 !important;
             font-size: 0.95rem;
             font-weight: 500;
-            transition: color 0.2s ease;
-            margin: 0 8px;
+            transition: all 0.2s ease;
+            margin: 0 6px;
+            border-radius: 6px;
+            padding: 6px 12px !important;
         }
 
         .nav-link:hover, .nav-link.active {
             color: #ffffff !important;
-            font-weight: 700;
+            background: rgba(138, 43, 226, 0.15);
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.25);
         }
 
-        /* Search Input */
+        /* Glowing Search Input */
         .search-box {
             position: relative;
         }
 
         .search-input {
-            background-color: rgba(0, 0, 0, 0.7);
-            border: 1px solid #444;
+            background-color: rgba(19, 18, 31, 0.85);
+            border: 1px solid var(--border-purple);
             color: #fff;
-            border-radius: 20px;
-            padding: 6px 16px 6px 36px;
+            border-radius: 22px;
+            padding: 7px 18px 7px 38px;
             font-size: 0.9rem;
-            width: 180px;
-            transition: width 0.3s ease, border-color 0.3s ease;
+            width: 200px;
+            transition: all 0.3s ease;
         }
 
         .search-input:focus {
-            background-color: #000;
-            border-color: var(--netflix-red);
-            box-shadow: none;
+            background-color: #0b0a12;
+            border-color: var(--aninova-purple);
+            box-shadow: 0 0 12px rgba(138, 43, 226, 0.4);
             outline: none;
             color: #fff;
-            width: 250px;
+            width: 260px;
         }
 
         .search-icon {
             position: absolute;
-            left: 12px;
+            left: 14px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
@@ -120,40 +138,42 @@
             font-size: 0.85rem;
         }
 
-        /* Primary Button */
-        .btn-netflix {
-            background-color: var(--netflix-red);
+        /* AniNova Primary Button */
+        .btn-aninova {
+            background: var(--brand-gradient);
             color: #ffffff;
             font-weight: 600;
             border: none;
-            border-radius: 4px;
-            padding: 8px 20px;
-            transition: background-color 0.2s ease, transform 0.2s ease;
+            border-radius: 6px;
+            padding: 8px 22px;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.35);
         }
 
-        .btn-netflix:hover {
-            background-color: var(--netflix-red-hover);
+        .btn-aninova:hover {
             color: #ffffff;
-            transform: scale(1.02);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 42, 133, 0.45);
         }
 
-        .btn-secondary-netflix {
-            background-color: rgba(109, 109, 110, 0.7);
-            color: white;
+        .btn-secondary-aninova {
+            background: rgba(28, 26, 46, 0.9);
+            color: #f0edf9;
             font-weight: 600;
-            border: none;
-            border-radius: 4px;
+            border: 1px solid var(--border-purple);
+            border-radius: 6px;
             padding: 8px 20px;
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
         }
 
-        .btn-secondary-netflix:hover {
-            background-color: rgba(109, 109, 110, 0.4);
-            color: white;
+        .btn-secondary-aninova:hover {
+            background: rgba(43, 39, 74, 0.9);
+            border-color: var(--aninova-purple);
+            color: #fff;
         }
 
-        /* Movie Row & Card */
-        .movie-section-title {
+        /* Anime Card & Carousel */
+        .anime-section-title {
             font-size: 1.35rem;
             font-weight: 700;
             margin-bottom: 14px;
@@ -163,66 +183,77 @@
             justify-content: space-between;
         }
 
-        .movie-carousel {
+        .anime-carousel {
             display: flex;
             overflow-x: auto;
             scroll-behavior: smooth;
-            gap: 14px;
+            gap: 16px;
             padding: 10px 0 25px 0;
             scrollbar-width: thin;
-            scrollbar-color: #333 transparent;
+            scrollbar-color: #2b274a transparent;
         }
 
-        .movie-carousel::-webkit-scrollbar {
+        .anime-carousel::-webkit-scrollbar {
             height: 6px;
         }
 
-        .movie-carousel::-webkit-scrollbar-thumb {
-            background-color: #333;
+        .anime-carousel::-webkit-scrollbar-thumb {
+            background-color: #2b274a;
             border-radius: 4px;
         }
 
-        .movie-card {
-            flex: 0 0 200px;
+        .anime-card {
+            flex: 0 0 205px;
             position: relative;
             background-color: var(--bg-card);
-            border-radius: 8px;
+            border: 1px solid var(--border-purple);
+            border-radius: 10px;
             overflow: hidden;
-            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
             cursor: pointer;
             text-decoration: none;
             color: inherit;
         }
 
-        .movie-card:hover {
-            transform: scale(1.08) translateY(-4px);
+        .anime-card:hover {
+            transform: scale(1.06) translateY(-5px);
             z-index: 10;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.9);
+            border-color: var(--aninova-purple);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.9), 0 0 18px rgba(138, 43, 226, 0.35);
         }
 
-        .movie-card-img {
+        .anime-card-img {
             width: 100%;
-            height: 290px;
+            height: 295px;
             object-fit: cover;
-            background: #252525;
+            background: #191728;
             display: block;
         }
 
-        .movie-card-overlay {
-            padding: 10px 12px;
-            background: #181818;
+        .anime-card-overlay {
+            padding: 12px 14px;
+            background: linear-gradient(180deg, #13121f 0%, #0d0c15 100%);
         }
 
-        .movie-card-title {
+        .anime-card-title {
             font-size: 0.95rem;
             font-weight: 700;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
-        .movie-card-meta {
+        .anime-card-jp {
+            font-size: 0.75rem;
+            color: var(--aninova-pink);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 6px;
+        }
+
+        .anime-card-meta {
             font-size: 0.78rem;
             color: var(--text-muted);
             display: flex;
@@ -230,126 +261,178 @@
             justify-content: space-between;
         }
 
-        .badge-premium {
-            background: linear-gradient(45deg, #f39c12, #e67e22);
-            color: #000;
-            font-weight: 800;
+        .badge-subdub {
+            background: rgba(0, 229, 255, 0.15);
+            color: var(--aninova-cyan);
+            border: 1px solid rgba(0, 229, 255, 0.3);
             font-size: 0.65rem;
-            padding: 2px 6px;
+            font-weight: 700;
+            padding: 2px 5px;
             border-radius: 3px;
         }
 
-        .badge-age {
-            border: 1px solid #777;
-            padding: 1px 4px;
-            font-size: 0.68rem;
-            border-radius: 2px;
-            color: #bbb;
+        .badge-vip {
+            background: var(--brand-gradient);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.65rem;
+            padding: 2px 7px;
+            border-radius: 3px;
+            box-shadow: var(--badge-glow);
+        }
+
+        .badge-rating {
+            color: #ffd166;
+            font-weight: 700;
+            font-size: 0.78rem;
         }
 
         /* Footer */
         footer {
             margin-top: auto;
-            background-color: #101010;
-            border-top: 1px solid var(--border-dark);
-            padding: 40px 4% 25px;
-            font-size: 0.85rem;
-            color: #777;
+            background-color: #08070d;
+            border-top: 1px solid var(--border-purple);
+            padding: 45px 4% 25px;
+            font-size: 0.88rem;
+            color: #797492;
         }
 
         footer a {
-            color: #888;
+            color: #9f9ab8;
             text-decoration: none;
             transition: color 0.2s ease;
         }
 
         footer a:hover {
-            color: #fff;
+            color: var(--aninova-cyan);
         }
 
         /* Flash message alerts */
-        .alert-streamflix {
-            background-color: rgba(30, 30, 30, 0.95);
-            border-left: 4px solid var(--netflix-red);
+        .alert-aninova {
+            background-color: rgba(21, 19, 36, 0.95);
+            border-left: 4px solid var(--aninova-purple);
             color: #fff;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <!-- Top Navigation Bar -->
-    <nav class="navbar navbar-expand-lg sf-navbar fixed-top" id="mainNav">
+    <nav class="navbar navbar-expand-lg ani-navbar fixed-top" id="mainNav">
         <div class="container-fluid">
-            <a class="sf-brand" href="{% url 'movies:home' %}">
-                <i class="fa-solid fa-play"></i>StreamFlix
+            <!-- Brand Logo & Anime Emblem -->
+            <a class="ani-brand" href="{% url 'movies:home' %}">
+                <i class="fa-solid fa-bolt text-warning"></i>AniNova
             </a>
 
             <button class="navbar-toggler border-0 text-light" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
-                <i class="fa-solid fa-bars fs-4"></i>
+                <i class="fa-solid fa-bars fs-4" style="color: var(--aninova-pink);"></i>
             </button>
 
             <div class="collapse navbar-collapse" id="navContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'movies:home' %}">Home</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'movies:home' %}">
+                            <i class="fa-solid fa-house me-1 text-secondary"></i>Home
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'movies:category_view' 'movies' %}">Movies</a>
+                        <a class="nav-link" href="{% url 'movies:category_view' 'anime-series' %}">
+                            <i class="fa-solid fa-tv me-1 text-secondary"></i>Anime Series
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'movies:category_view' 'web-series' %}">Web Series</a>
+                        <a class="nav-link" href="{% url 'movies:category_view' 'anime-movies' %}">
+                            <i class="fa-solid fa-film me-1 text-secondary"></i>Movies
+                        </a>
+                    </li>
+                    <!-- Anime Genres Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-masks-theater me-1 text-secondary"></i>Genres
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark p-2" style="background-color: var(--bg-card); border: 1px solid var(--border-purple); min-width: 320px;">
+                            <div class="row g-1">
+                                <div class="col-6">
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'action' %}">Action</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'adventure' %}">Adventure</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'romance' %}">Romance</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'comedy' %}">Comedy</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'fantasy' %}">Fantasy</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'isekai' %}">Isekai</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'thriller' %}">Thriller</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'horror' %}">Horror</a></li>
+                                </div>
+                                <div class="col-6">
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'sci-fi' %}">Sci-Fi</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'sports' %}">Sports</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'slice-of-life' %}">Slice of Life</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'mystery' %}">Mystery</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'supernatural' %}">Supernatural</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'drama' %}">Drama</a></li>
+                                    <li><a class="dropdown-item small" href="{% url 'movies:genre_view' 'psychological' %}">Psychological</a></li>
+                                </div>
+                            </div>
+                        </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'watchlist:my_list' %}">My List</a>
+                        <a class="nav-link" href="{% url 'watchlist:my_list' %}">
+                            <i class="fa-solid fa-bookmark me-1 text-secondary"></i>My List
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'subscriptions:plans' %}">
-                            <i class="fa-solid fa-crown text-warning me-1"></i>Subscribe
+                            <i class="fa-solid fa-crown text-warning me-1"></i>Otaku VIP
                         </a>
                     </li>
                 </ul>
 
                 <!-- Right Side Actions -->
                 <div class="d-flex align-items-center gap-3">
-                    <!-- Search Bar -->
+                    <!-- Anime Search Bar -->
                     <form class="search-box" action="{% url 'movies:search' %}" method="GET">
                         <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input class="form-control search-input" type="search" name="q" placeholder="Titles, genres..." value="{{ request.GET.q|default:'' }}">
+                        <input class="form-control search-input" type="search" name="q" placeholder="Anime, studio, genre..." value="{{ request.GET.q|default:'' }}">
                     </form>
 
                     {% if request.user.is_authenticated %}
                         <!-- Notifications -->
                         <div class="dropdown">
                             <a href="#" class="text-light text-decoration-none position-relative" data-bs-toggle="dropdown">
-                                <i class="fa-regular fa-bell fs-5"></i>
-                                {% if request.user.notifications.filter.count > 0 %}
+                                <i class="fa-regular fa-bell fs-5" style="color: var(--aninova-cyan);"></i>
+                                {% if request.user.notifications.count > 0 %}
                                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle"></span>
                                 {% endif %}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-2" style="min-width: 280px;">
-                                <li class="dropdown-header text-uppercase text-secondary fw-bold small">Notifications</li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item small text-wrap py-2" href="#">New Release: <strong>Cyberverse 2099</strong> is now streaming!</a></li>
-                                <li><a class="dropdown-item small text-wrap py-2" href="#">Welcome to StreamFlix. Browse hundreds of movies.</a></li>
+                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-2" style="background-color: var(--bg-card); border: 1px solid var(--border-purple); min-width: 280px;">
+                                <li class="dropdown-header text-uppercase text-secondary fw-bold small">Simulcast Alerts</li>
+                                <li><hr class="dropdown-divider border-secondary"></li>
+                                <li><a class="dropdown-item small text-wrap py-2" href="#"><strong>Demon Slayer</strong> Season 4 Episode 1 is now streaming!</a></li>
+                                <li><a class="dropdown-item small text-wrap py-2" href="#"><strong>Solo Leveling</strong> Episode 12 English Dub released.</a></li>
                             </ul>
                         </div>
 
-                        <!-- User Profile Dropdown -->
+                        <!-- User Profile Avatar & Dropdown -->
                         <div class="dropdown">
                             <a href="#" class="d-flex align-items-center text-light text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-                                <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ request.user.username }}" alt="Avatar" width="34" height="34" class="rounded-1 border border-secondary me-2">
+                                <img src="{{ request.user.profile.avatar_url }}" alt="Profile Photo" width="36" height="36" class="rounded-circle border border-2 me-2" style="border-color: var(--aninova-purple) !important; object-fit: cover;">
                                 <span class="d-none d-md-inline small fw-semibold">{{ request.user.username }}</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
-                                <li><h6 class="dropdown-header text-light fw-bold">{{ request.user.get_full_name|default:request.user.username }}</h6></li>
+                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow" style="background-color: var(--bg-card); border: 1px solid var(--border-purple);">
+                                <li>
+                                    <div class="px-3 py-2 border-bottom border-dark">
+                                        <div class="fw-bold text-light">{{ request.user.get_full_name|default:request.user.username }}</div>
+                                        <div class="text-secondary small">{{ request.user.email }}</div>
+                                    </div>
+                                </li>
                                 {% if request.user.is_staff %}
-                                    <li><a class="dropdown-item" href="{% url 'dashboard:admin_dashboard' %}"><i class="fa-solid fa-gauge-high text-danger me-2"></i>Admin Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'dashboard:admin_dashboard' %}"><i class="fa-solid fa-gauge-high text-danger me-2"></i>AniNova Studio Admin</a></li>
                                 {% endif %}
-                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fa-solid fa-user me-2"></i>My Account</a></li>
-                                <li><a class="dropdown-item" href="{% url 'watchlist:my_list' %}"><i class="fa-solid fa-bookmark me-2"></i>My Watchlist</a></li>
-                                <li><a class="dropdown-item" href="{% url 'subscriptions:plans' %}"><i class="fa-solid fa-crown text-warning me-2"></i>Membership</a></li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fa-solid fa-user-pen text-info me-2"></i>Edit Profile & Photo</a></li>
+                                <li><a class="dropdown-item" href="{% url 'watchlist:my_list' %}"><i class="fa-solid fa-bookmark text-warning me-2"></i>Anime Watchlist</a></li>
+                                <li><a class="dropdown-item" href="{% url 'subscriptions:plans' %}"><i class="fa-solid fa-crown text-warning me-2"></i>VIP Membership</a></li>
+                                <li><hr class="dropdown-divider border-secondary"></li>
                                 <li>
                                     <form action="{% url 'accounts:logout' %}" method="POST" class="d-inline">
                                         {% csrf_token %}
@@ -359,7 +442,7 @@
                             </ul>
                         </div>
                     {% else %}
-                        <a href="{% url 'accounts:login' %}" class="btn btn-netflix btn-sm px-3">Sign In</a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-aninova btn-sm px-3">Sign In</a>
                     {% endif %}
                 </div>
             </div>
@@ -367,11 +450,11 @@
     </nav>
 
     <!-- Flash Messages Container -->
-    <div class="container-fluid px-4" style="margin-top: 85px;">
+    <div class="container-fluid px-4" style="margin-top: 88px;">
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-streamflix alert-dismissible fade show" role="alert">
-                    <i class="fa-solid fa-circle-info text-danger me-2"></i>{{ message }}
+                <div class="alert alert-aninova alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-circle-check text-info me-2"></i>{{ message }}
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
                 </div>
             {% endfor %}
@@ -388,51 +471,69 @@
         <div class="container-fluid px-md-5">
             <div class="row gy-4">
                 <div class="col-lg-3 col-md-6">
-                    <h5 class="text-danger fw-bold mb-3"><i class="fa-solid fa-play me-2"></i>StreamFlix</h5>
-                    <p class="small">Next-generation OTT streaming platform engineered with Python, Django, MySQL, HLS adaptive video, and Razorpay payment integration.</p>
+                    <h4 class="ani-brand mb-1"><i class="fa-solid fa-bolt text-warning"></i>AniNova</h4>
+                    <p class="ani-brand-tagline mb-3">A New World of Anime.</p>
+                    <p class="small text-secondary">The ultimate anime streaming destination engineered with Python, Django, MySQL, and HLS adaptive video delivery.</p>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <h6 class="text-light fw-bold mb-3">Browse</h6>
-                    <ul class="list-unstyled small">
-                        <li class="mb-2"><a href="{% url 'movies:category_view' 'movies' %}">Featured Movies</a></li>
-                        <li class="mb-2"><a href="{% url 'movies:category_view' 'web-series' %}">Trending TV Series</a></li>
-                        <li class="mb-2"><a href="{% url 'subscriptions:plans' %}">Subscription Plans</a></li>
-                    </ul>
+                    <h6 class="text-light fw-bold mb-3">Anime Categories</h6>
+                    <div class="row g-1 small">
+                        <div class="col-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-1"><a href="{% url 'movies:genre_view' 'action' %}">Action</a></li>
+                                <li class="mb-1"><a href="{% url 'movies:genre_view' 'adventure' %}">Adventure</a></li>
+                                <li class="mb-1"><a href="{% url 'movies:genre_view' 'isekai' %}">Isekai</a></li>
+                                <li class="mb-1"><a href="{% url 'movies:genre_view' 'fantasy' %}">Fantasy</a></li>
+                                <li class="mb-1"><a href="{% url 'movies:genre_view' 'romance' %}">Romance</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-1"><a href="{% url 'movies:genre_view' 'supernatural' %}">Supernatural</a></li>
+                                <li class="mb-1"><a href="{% url 'movies:genre_view' 'comedy' %}">Comedy</a></li>
+                                <li class="mb-1"><a href="{% url 'movies:genre_view' 'psychological' %}">Psychological</a></li>
+                                <li class="mb-1"><a href="{% url 'movies:genre_view' 'sports' %}">Sports</a></li>
+                                <li class="mb-1"><a href="{% url 'movies:genre_view' 'slice-of-life' %}">Slice of Life</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <h6 class="text-light fw-bold mb-3">Help & Support</h6>
+                    <h6 class="text-light fw-bold mb-3">Navigation</h6>
                     <ul class="list-unstyled small">
-                        <li class="mb-2"><a href="#">FAQ & Streaming Help</a></li>
-                        <li class="mb-2"><a href="#">Supported Devices</a></li>
+                        <li class="mb-2"><a href="{% url 'movies:category_view' 'anime-series' %}">Simulcast Series</a></li>
+                        <li class="mb-2"><a href="{% url 'movies:category_view' 'anime-movies' %}">Anime Feature Films</a></li>
+                        <li class="mb-2"><a href="{% url 'subscriptions:plans' %}">Otaku VIP Membership</a></li>
                         <li class="mb-2"><a href="#">Terms of Service</a></li>
                         <li class="mb-2"><a href="#">Privacy Policy</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <h6 class="text-light fw-bold mb-3">Developer Portfolio</h6>
-                    <p class="small mb-2">Designed and built by a Full-Stack Python / Django Developer.</p>
-                    <div class="d-flex gap-3 fs-5 mt-2">
-                        <a href="#" class="text-secondary"><i class="fa-brands fa-github"></i></a>
-                        <a href="#" class="text-secondary"><i class="fa-brands fa-linkedin"></i></a>
-                        <a href="#" class="text-secondary"><i class="fa-solid fa-envelope"></i></a>
+                    <h6 class="text-light fw-bold mb-3">AniNova Community</h6>
+                    <p class="small text-secondary mb-2">Connect with anime fans worldwide, track watchlists, and enjoy Sub & Dub releases.</p>
+                    <div class="d-flex gap-3 fs-5 mt-3">
+                        <a href="#" class="text-secondary"><i class="fa-brands fa-discord" style="color: #5865F2;"></i></a>
+                        <a href="#" class="text-secondary"><i class="fa-brands fa-x-twitter"></i></a>
+                        <a href="#" class="text-secondary"><i class="fa-brands fa-instagram" style="color: #E1306C;"></i></a>
+                        <a href="#" class="text-secondary"><i class="fa-brands fa-reddit" style="color: #FF4500;"></i></a>
                     </div>
                 </div>
             </div>
             <div class="text-center pt-4 mt-4 border-top border-dark small text-secondary">
-                &copy; {% now "Y" %} StreamFlix Inc. All rights reserved. Built for portfolio demonstration.
+                &copy; {% now "Y" %} <strong>AniNova</strong>. All anime artworks, studios, and trademarks belong to their respective creators. Built for portfolio demonstration.
             </div>
         </div>
     </footer>
 
-    <!-- Bootstrap 5 JS Bundle -->
+    <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Global App JS -->
+    <!-- Global JS -->
     <script>
         // Navbar scroll effect
         window.addEventListener('scroll', function() {
             const nav = document.getElementById('mainNav');
-            if (window.scrollY > 50) {
+            if (window.scrollY > 40) {
                 nav.classList.add('scrolled');
             } else {
                 nav.classList.remove('scrolled');

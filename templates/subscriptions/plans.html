@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Membership Plans - StreamFlix{% endblock %}
+{% block title %}Otaku VIP Membership - AniNova{% endblock %}
 
 {% block extra_css %}
 <style>
     .plan-card {
-        background-color: #1a1a1a;
-        border: 2px solid #2d2d2d;
+        background-color: var(--bg-card);
+        border: 2px solid var(--border-purple);
         border-radius: 12px;
         transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         display: flex;
@@ -15,13 +15,13 @@
 
     .plan-card:hover {
         transform: translateY(-6px);
-        border-color: #555;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.8);
+        border-color: var(--aninova-purple);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.8), 0 0 15px rgba(138, 43, 226, 0.35);
     }
 
     .plan-card.featured {
-        border-color: var(--netflix-red);
-        background: linear-gradient(180deg, rgba(229, 9, 20, 0.12) 0%, #1a1a1a 40%);
+        border-color: var(--aninova-pink);
+        background: linear-gradient(180deg, rgba(255, 42, 133, 0.12) 0%, var(--bg-card) 45%);
     }
 
     .plan-badge {
@@ -29,18 +29,19 @@
         top: -12px;
         left: 50%;
         transform: translateX(-50%);
-        background-color: var(--netflix-red);
+        background: var(--brand-gradient);
         color: white;
         font-weight: 800;
         font-size: 0.75rem;
         padding: 4px 14px;
         border-radius: 20px;
         letter-spacing: 1px;
+        box-shadow: var(--badge-glow);
     }
 
     .feature-item {
         font-size: 0.88rem;
-        color: #ccc;
+        color: #d1cde0;
         margin-bottom: 12px;
         display: flex;
         align-items: center;
@@ -56,16 +57,16 @@
 {% block content %}
 <div class="container py-5">
     <div class="text-center mb-5">
-        <span class="badge bg-danger text-uppercase px-3 py-2 mb-2">Flexible Memberships</span>
-        <h1 class="fw-bold text-light">Choose the plan that's right for you</h1>
-        <p class="text-secondary">Watch all you want. Cancel anytime or switch plans whenever you like.</p>
+        <span class="badge text-uppercase px-3 py-2 mb-2" style="background: var(--brand-gradient);">Otaku VIP Memberships</span>
+        <h1 class="fw-bold text-light">Stream Anime Without Limits</h1>
+        <p class="text-secondary">Simulcast releases straight from Tokyo. Ad-free episodes in 4K with Japanese audio and multi-language subs.</p>
     </div>
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
         {% for plan in plans %}
             <div class="col">
-                <div class="card h-100 plan-card position-relative p-4 {% if 'Premium' in plan.name %}featured{% endif %}">
-                    {% if 'Premium' in plan.name %}
+                <div class="card h-100 plan-card position-relative p-4 {% if 'VIP' in plan.name or 'Mega' in plan.name %}featured{% endif %}">
+                    {% if 'VIP' in plan.name or 'Mega' in plan.name %}
                         <div class="plan-badge text-uppercase"><i class="fa-solid fa-crown me-1"></i>Most Popular</div>
                     {% endif %}
 
@@ -79,16 +80,16 @@
 
                     <div class="flex-grow-1 my-3">
                         <div class="feature-item">
-                            <i class="fa-solid fa-tv text-danger"></i>
+                            <i class="fa-solid fa-tv" style="color: var(--aninova-cyan);"></i>
                             <span>{{ plan.max_quality }}</span>
                         </div>
                         <div class="feature-item">
-                            <i class="fa-solid fa-users text-danger"></i>
-                            <span>{{ plan.max_screens }} Simultaneous Screen(s)</span>
+                            <i class="fa-solid fa-bolt" style="color: var(--aninova-pink);"></i>
+                            <span>Simulcast 1 Hour After Japan</span>
                         </div>
                         <div class="feature-item">
-                            <i class="fa-solid fa-mobile-screen text-danger"></i>
-                            <span>Phone, Tablet, Laptop, TV</span>
+                            <i class="fa-solid fa-users" style="color: var(--aninova-purple);"></i>
+                            <span>{{ plan.max_screens }} Simultaneous Screen(s)</span>
                         </div>
                         <div class="feature-item">
                             {% if plan.has_ads %}
@@ -96,7 +97,7 @@
                                 <span>Includes Sponsored Ads</span>
                             {% else %}
                                 <i class="fa-solid fa-ban text-success"></i>
-                                <span>Ad-Free Entertainment</span>
+                                <span>100% Ad-Free Anime</span>
                             {% endif %}
                         </div>
                     </div>
@@ -104,10 +105,10 @@
                     <div>
                         {% if current_sub and current_sub.plan == plan and current_sub.is_currently_valid %}
                             <button class="btn btn-secondary w-100 disabled py-2" disabled>
-                                <i class="fa-solid fa-check me-1"></i>Current Plan
+                                <i class="fa-solid fa-check me-1"></i>Active Membership
                             </button>
                         {% else %}
-                            <a href="{% url 'subscriptions:checkout' plan.id %}" class="btn {% if 'Premium' in plan.name %}btn-netflix{% else %}btn-secondary-netflix{% endif %} w-100 py-2 fw-bold">
+                            <a href="{% url 'subscriptions:checkout' plan.id %}" class="btn {% if 'VIP' in plan.name or 'Mega' in plan.name %}btn-aninova{% else %}btn-secondary-aninova{% endif %} w-100 py-2 fw-bold">
                                 Select Plan
                             </a>
                         {% endif %}
@@ -117,10 +118,9 @@
         {% endfor %}
     </div>
 
-    <!-- Assurance Banner -->
-    <div class="p-4 rounded text-center" style="background-color: #181818; border: 1px solid #2a2a2a;">
-        <h6 class="text-light fw-bold mb-2"><i class="fa-solid fa-shield-halved text-success me-2"></i>100% Secure Checkout via Razorpay</h6>
-        <p class="text-secondary small mb-0">Test Mode enabled. Supports UPI, NetBanking, Credit/Debit cards and digital wallets.</p>
+    <div class="p-4 rounded text-center" style="background-color: var(--bg-card); border: 1px solid var(--border-purple);">
+        <h6 class="text-light fw-bold mb-2"><i class="fa-solid fa-shield-halved text-success me-2"></i>100% Secure Checkout powered by Razorpay</h6>
+        <p class="text-secondary small mb-0">Cancel anytime with 1 click in your Otaku Profile. Instant activation on phone, PC, and Smart TV.</p>
     </div>
 </div>
 {% endblock %}

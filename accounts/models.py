@@ -6,19 +6,21 @@ from django.dispatch import receiver
 
 class UserProfile(models.Model):
     """
-    Extends standard Django User model with OTT profile details and role-based permissions.
+    Extends standard Django User model with AniNova anime profile details,
+    customizable anime avatar, and role-based permissions.
     """
     ROLE_CHOICES = (
-        ('customer', 'Customer / Viewer'),
-        ('creator', 'Content Creator / Uploader'),
-        ('admin', 'Platform Administrator'),
+        ('customer', 'Anime Enthusiast / Viewer'),
+        ('creator', 'Anime Content Creator'),
+        ('admin', 'AniNova Platform Administrator'),
     )
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='customer')
     phone = models.CharField(max_length=15, blank=True, null=True)
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, default='avatars/default.png')
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     bio = models.TextField(blank=True, null=True, max_length=500)
+    favorite_anime = models.CharField(max_length=200, blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -27,6 +29,13 @@ class UserProfile(models.Model):
         db_table = 'streamflix_user_profiles'
         verbose_name = 'User Profile'
         verbose_name_plural = 'User Profiles'
+
+    @property
+    def avatar_url(self):
+        """Returns the user uploaded avatar URL if present, otherwise an anime avatar seed."""
+        if self.avatar and hasattr(self.avatar, 'url'):
+            return self.avatar.url
+        return f"https://api.dicebear.com/7.x/adventurer/svg?seed={self.user.username}"
 
     def __str__(self):
         return f"{self.user.username} ({self.get_role_display()})"
@@ -44,12 +53,12 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
 
 class Notification(models.Model):
     """
-    In-app alerts for users regarding new releases, subscription renewal, and watchlist updates.
+    In-app alerts for users regarding new anime episodes, simulcast releases, and renewals.
     """
     TYPE_CHOICES = (
         ('info', 'Information'),
         ('subscription', 'Subscription Update'),
-        ('release', 'New Release Alert'),
+        ('release', 'New Episode / Anime Release'),
         ('watchlist', 'Watchlist Reminder'),
     )
 

@@ -1,75 +1,235 @@
 {% extends 'base.html' %}
 
-{% block title %}My Account - StreamFlix{% endblock %}
+{% block title %}My Otaku Profile - AniNova{% endblock %}
+
+{% block extra_css %}
+<style>
+    .avatar-wrapper {
+        position: relative;
+        width: 130px;
+        height: 130px;
+        margin: 0 auto 15px;
+    }
+
+    .avatar-img {
+        width: 130px;
+        height: 130px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid var(--aninova-purple);
+        box-shadow: 0 0 20px rgba(138, 43, 226, 0.45);
+        background: #191728;
+    }
+
+    .avatar-edit-overlay {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        background: var(--brand-gradient);
+        color: white;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: 2px solid #0b0a12;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+        transition: transform 0.2s ease;
+    }
+
+    .avatar-edit-overlay:hover {
+        transform: scale(1.1);
+    }
+
+    .preview-box {
+        display: none;
+        border: 2px dashed var(--aninova-cyan);
+        border-radius: 10px;
+        padding: 15px;
+        background: rgba(0, 229, 255, 0.05);
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .preview-img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid var(--aninova-cyan);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5" style="max-width: 900px;">
-    <div class="card bg-dark border-secondary p-4 p-md-5 rounded shadow">
+<div class="container py-5" style="max-width: 950px;">
+    <div class="card p-4 p-md-5 rounded shadow" style="background-color: var(--bg-card); border: 1px solid var(--border-purple);">
         <!-- Profile Header -->
-        <div class="d-flex flex-wrap align-items-center justify-content-between pb-4 border-bottom border-secondary mb-4 gap-3">
-            <div class="d-flex align-items-center gap-3">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ request.user.username }}" alt="Avatar" width="70" height="70" class="rounded-circle border border-danger">
-                <div>
-                    <h3 class="fw-bold text-light mb-1">{{ request.user.get_full_name|default:request.user.username }}</h3>
-                    <div class="text-secondary small">{{ request.user.email }} &bull; Member since {{ request.user.date_joined|date:"M Y" }}</div>
-                </div>
+        <div class="text-center pb-4 border-bottom border-dark mb-4">
+            <!-- Interactive Avatar -->
+            <div class="avatar-wrapper">
+                <img src="{{ profile.avatar_url }}" alt="Profile Photo" id="currentAvatar" class="avatar-img">
+                <label for="avatarInput" class="avatar-edit-overlay" title="Upload new profile photo">
+                    <i class="fa-solid fa-camera"></i>
+                </label>
             </div>
-            <div>
-                <span class="badge bg-secondary text-uppercase px-3 py-2">{{ profile.get_role_display }}</span>
+
+            <h3 class="fw-bold text-light mb-1">{{ request.user.get_full_name|default:request.user.username }}</h3>
+            <div class="text-secondary small">
+                <span class="text-info">@{{ request.user.username }}</span> &bull; 
+                Member since {{ request.user.date_joined|date:"M Y" }} &bull; 
+                <span class="badge bg-secondary text-uppercase">{{ profile.get_role_display }}</span>
+            </div>
+
+            <!-- Avatar Upload & Remove Form (Triggered upon photo selection) -->
+            <form method="POST" enctype="multipart/form-data" id="photoForm" class="mt-3">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_photo">
+                <input type="file" name="avatar" id="avatarInput" accept=".jpg,.jpeg,.png,.webp" style="display: none;" onchange="previewSelectedImage(this)">
+
+                <!-- Live Image Preview Container -->
+                <div id="previewContainer" class="preview-box mx-auto" style="max-width: 360px;">
+                    <div class="small text-info fw-bold mb-2"><i class="fa-solid fa-eye me-1"></i>New Photo Preview</div>
+                    <img id="imagePreview" src="#" alt="Preview" class="preview-img mb-2">
+                    <div class="d-flex gap-2 justify-content-center mt-2">
+                        <button type="submit" class="btn btn-aninova btn-sm px-3">
+                            <i class="fa-solid fa-floppy-disk me-1"></i>Save New Photo
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm px-3" onclick="cancelPreview()">Cancel</button>
+                    </div>
+                </div>
+            </form>
+
+            {% if profile.avatar %}
+                <form action="{% url 'accounts:remove_avatar' %}" method="POST" class="d-inline" onsubmit="return confirm('Reset to default anime avatar?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm mt-1" style="font-size: 0.78rem;">
+                        <i class="fa-solid fa-trash me-1"></i>Remove Custom Photo
+                    </button>
+                </form>
+            {% endif %}
+
+            <div class="text-muted mt-2" style="font-size: 0.75rem;">
+                Supported formats: <strong>JPG, JPEG, PNG, WEBP</strong> (Max 5MB)
             </div>
         </div>
 
-        <!-- Membership & Subscription Card -->
-        <div class="card p-3 mb-4" style="background-color: #1a1a1a; border: 1px solid #333;">
+        <!-- Membership Banner -->
+        <div class="card p-3 mb-4" style="background-color: #1a172e; border: 1px solid var(--border-purple);">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                 <div>
-                    <span class="text-secondary small text-uppercase fw-bold">Active Membership</span>
+                    <span class="text-secondary small text-uppercase fw-bold"><i class="fa-solid fa-crown text-warning me-1"></i>AniNova Membership</span>
                     {% if subscription and subscription.is_currently_valid %}
-                        <h4 class="text-warning fw-bold mt-1 mb-0"><i class="fa-solid fa-crown me-2"></i>{{ subscription.plan.name }}</h4>
+                        <h4 class="text-warning fw-bold mt-1 mb-0">{{ subscription.plan.name }}</h4>
                         <div class="text-secondary small mt-1">Valid until {{ subscription.end_date|date:"F d, Y" }} &bull; Max Quality: {{ subscription.plan.max_quality }}</div>
                     {% else %}
-                        <h5 class="text-light mt-1 mb-0">Free / No Active Paid Plan</h5>
-                        <div class="text-secondary small mt-1">Upgrade to watch 4K Ultra HD movies with no ads.</div>
+                        <h5 class="text-light mt-1 mb-0">Free Anime Tier</h5>
+                        <div class="text-secondary small mt-1">Upgrade to Otaku VIP for ad-free 4K simulcasts 1 hour after Japan.</div>
                     {% endif %}
                 </div>
                 <div>
-                    <a href="{% url 'subscriptions:plans' %}" class="btn btn-netflix btn-sm px-3">
-                        {% if subscription and subscription.is_currently_valid %}Manage Plan{% else %}Upgrade to Premium{% endif %}
+                    <a href="{% url 'subscriptions:plans' %}" class="btn btn-aninova btn-sm px-3">
+                        {% if subscription and subscription.is_currently_valid %}Manage VIP Plan{% else %}Upgrade to VIP{% endif %}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Activity Stats -->
+        <!-- Anime Watch Stats -->
         <div class="row g-3 mb-4">
             <div class="col-sm-6">
-                <div class="p-3 rounded text-center" style="background-color: #222;">
-                    <div class="fs-3 fw-bold text-danger">{{ watchlist_count }}</div>
-                    <div class="text-secondary small">Items in Watchlist</div>
+                <div class="p-3 rounded text-center" style="background-color: #191728; border: 1px solid var(--border-purple);">
+                    <div class="fs-3 fw-bold" style="color: var(--aninova-pink);">{{ watchlist_count }}</div>
+                    <div class="text-secondary small">Anime in My List</div>
                 </div>
             </div>
             <div class="col-sm-6">
-                <div class="p-3 rounded text-center" style="background-color: #222;">
-                    <div class="fs-3 fw-bold text-success">{{ watched_count }}</div>
-                    <div class="text-secondary small">Completed Titles</div>
+                <div class="p-3 rounded text-center" style="background-color: #191728; border: 1px solid var(--border-purple);">
+                    <div class="fs-3 fw-bold" style="color: var(--aninova-cyan);">{{ watched_count }}</div>
+                    <div class="text-secondary small">Completed Episodes / Movies</div>
                 </div>
             </div>
         </div>
 
-        <!-- Profile Edit Form -->
-        <h5 class="text-light fw-bold mb-3">Edit Profile Info</h5>
+        <!-- Profile Information Editing Form -->
+        <h5 class="text-light fw-bold mb-3"><i class="fa-solid fa-pen-to-square text-info me-2"></i>Edit Account Information</h5>
         <form method="POST">
             {% csrf_token %}
-            <div class="mb-3">
-                <label class="form-label text-secondary small">Phone Number</label>
-                {{ profile_form.phone }}
+            <input type="hidden" name="action" value="update_info">
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold">Username *</label>
+                    {{ account_form.username }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold">Email Address *</label>
+                    {{ account_form.email }}
+                </div>
             </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold">First Name</label>
+                    {{ account_form.first_name }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold">Last Name</label>
+                    {{ account_form.last_name }}
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold">Phone Number</label>
+                    {{ info_form.phone }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold">Favorite Anime</label>
+                    {{ info_form.favorite_anime }}
+                </div>
+            </div>
+
             <div class="mb-4">
-                <label class="form-label text-secondary small">Bio & Movie Preferences</label>
-                {{ profile_form.bio }}
+                <label class="form-label text-secondary small fw-bold">Otaku Bio & Preferences</label>
+                {{ info_form.bio }}
             </div>
-            <button type="submit" class="btn btn-netflix btn-sm px-4">Save Changes</button>
+
+            <button type="submit" class="btn btn-aninova px-4 py-2">
+                <i class="fa-solid fa-check me-1"></i>Save Account Changes
+            </button>
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function previewSelectedImage(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+
+            // Client side file size validation (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert("File size exceeds 5MB limit. Please choose a smaller image.");
+                input.value = "";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('previewContainer').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function cancelPreview() {
+        document.getElementById('avatarInput').value = "";
+        document.getElementById('previewContainer').style.display = 'none';
+    }
+</script>
 {% endblock %}
