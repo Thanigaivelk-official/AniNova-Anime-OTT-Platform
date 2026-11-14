@@ -1,11 +1,12 @@
 """
-StreamFlix - Online Movie & Video Streaming Platform
-Django Settings Configuration
+AniNova - A New World of Anime
+Django Settings Configuration (Production Ready for Render & Local Development)
 """
 
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +28,6 @@ CSRF_TRUSTED_ORIGINS = [
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
     CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
-    # Render terminates HTTPS at its proxy
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
 
-    # StreamFlix custom modules
+    # AniNova custom modules
     'accounts.apps.AccountsConfig',
     'movies.apps.MoviesConfig',
     'streaming.apps.StreamingConfig',
@@ -91,11 +91,21 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database Configuration
-# Primary: MySQL (configured via .env)
-# Fallback toggle: USE_SQLITE=True in .env allows instant offline dev if MySQL server is stopped
+# Priority 1: DATABASE_URL (Render PostgreSQL / Cloud Database)
+# Priority 2: USE_SQLITE=True (Instant zero-config Render demo or offline dev)
+# Priority 3: MySQL (Local or TiDB Cloud / Aiven)
+DATABASE_URL = os.getenv('DATABASE_URL')
 USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() in ('true', '1', 'yes')
 
-if USE_SQLITE:
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+elif USE_SQLITE:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -117,7 +127,7 @@ else:
             },
         }
     }
-    # Cloud MySQL (TiDB Cloud, Aiven, etc.) needs TLS. Set DB_SSL=True on Render.
+    # Cloud MySQL TLS
     if os.getenv('DB_SSL', 'False').lower() in ('true', '1', 'yes'):
         DATABASES['default']['OPTIONS']['ssl'] = {
             'ca': os.getenv('DB_SSL_CA', '/etc/ssl/certs/ca-certificates.crt'),
@@ -152,12 +162,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# WhiteNoise serves static files (incl. admin CSS) when DEBUG=False
-STORAGES = {
-    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
-    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
-}
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files (User uploads, Movie posters, Video assets)
 MEDIA_URL = '/media/'
