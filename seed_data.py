@@ -26,7 +26,7 @@ def seed_anime():
         'is_staff': True,
         'is_superuser': True,
     })
-    admin_user.set_password('admin123')
+    admin_user.set_password(os.getenv('ADMIN_PASSWORD', 'admin123'))
     admin_user.save()
     admin_user.profile.role = 'admin'
     admin_user.profile.is_verified = True
@@ -35,7 +35,7 @@ def seed_anime():
     demo_user, _ = User.objects.get_or_create(username='viewer', defaults={
         'email': 'viewer@aninova.tv',
     })
-    demo_user.set_password('viewer123')
+    demo_user.set_password(os.getenv('VIEWER_PASSWORD', 'viewer123'))
     demo_user.save()
     demo_user.profile.role = 'customer'
     demo_user.profile.is_verified = True
