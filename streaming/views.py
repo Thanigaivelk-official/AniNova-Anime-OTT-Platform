@@ -146,20 +146,29 @@ def play_episode(request, episode_id):
 @csrf_exempt
 def update_progress_api(request):
     """
-    AJAX endpoint called periodically by the player to store anime watch position.
+    Sanitized AJAX endpoint called periodically by the player to store anime watch position.
+    Validates content existence, non-negative timestamps, and duration boundaries.
     """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             content_type = data.get('content_type')
-            content_id = int(data.get('content_id'))
-            current_time = int(float(data.get('current_time', 0)))
-            duration = int(float(data.get('duration', 0)))
+            content_id = int(data.get('content_id', 0))
+            raw_time = float(data.get('current_time', 0))
+            raw_duration = float(data.get('duration', 0))
+
+            if content_type not in ('movie', 'episode') or content_id <= 0:
+                return JsonResponse({'status': 'error', 'message': 'Invalid content parameters.'}, status=400)
+
+            duration = max(0, int(raw_duration))
+            current_time = max(0, int(raw_time))
+            if duration > 0:
+                current_time = min(current_time, duration)
 
             is_completed = (current_time / duration >= 0.90) if duration > 0 else False
 
             if content_type == 'movie':
-                movie = Movie.objects.get(id=content_id)
+                movie = get_object_or_404(Movie, id=content_id)
                 WatchHistory.objects.update_or_create(
                     user=request.user,
                     movie=movie,
@@ -170,7 +179,7 @@ def update_progress_api(request):
                     }
                 )
             elif content_type == 'episode':
-                episode = Episode.objects.get(id=content_id)
+                episode = get_object_or_404(Episode, id=content_id)
                 WatchHistory.objects.update_or_create(
                     user=request.user,
                     episode=episode,
@@ -180,7 +189,7 @@ def update_progress_api(request):
                         'is_completed': is_completed,
                     }
                 )
-            return JsonResponse({'status': 'success', 'saved_position': current_time})
+            return JsonResponse({'status': 'success', 'saved_position': current_time, 'is_completed': is_completed})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 

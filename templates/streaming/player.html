@@ -394,9 +394,16 @@
                 case 'f':
                     e.preventDefault();
                     if (!document.fullscreenElement) {
-                        document.getElementById('playerWrap').requestFullscreen().catch(err => alert(err.message));
+                        const pw = document.getElementById('playerWrap');
+                        if (pw.requestFullscreen) {
+                            pw.requestFullscreen().catch(() => {});
+                        } else if (video.webkitEnterFullscreen) {
+                            video.webkitEnterFullscreen();
+                        }
                     } else {
-                        document.exitFullscreen();
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen().catch(() => {});
+                        }
                     }
                     break;
                 case 'm':

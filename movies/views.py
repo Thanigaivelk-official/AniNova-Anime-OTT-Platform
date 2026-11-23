@@ -10,15 +10,16 @@ def home(request):
     AniNova Anime Homepage - Cyber-purple dark theme with anime spotlight hero,
     trending simulcasts, top-rated anime, and Otaku categories.
     """
-    featured_anime = Movie.objects.filter(is_featured=True).first()
+    featured_anime = Movie.objects.prefetch_related('genres').filter(is_featured=True).first()
     if not featured_anime:
-        featured_anime = Movie.objects.first()
+        featured_anime = Movie.objects.prefetch_related('genres').first()
 
-    trending_anime = Movie.objects.filter(is_trending=True)[:10]
-    popular_anime = Movie.objects.order_by('-views_count')[:10]
-    simulcast_series = Movie.objects.filter(content_type='series')[:10]
-    anime_movies = Movie.objects.filter(content_type='movie')[:10]
-    top_rated_anime = Movie.objects.order_by('-imdb_rating')[:10]
+    base_qs = Movie.objects.prefetch_related('genres')
+    trending_anime = base_qs.filter(is_trending=True)[:10]
+    popular_anime = base_qs.order_by('-views_count')[:10]
+    simulcast_series = base_qs.filter(content_type='series')[:10]
+    anime_movies = base_qs.filter(content_type='movie')[:10]
+    top_rated_anime = base_qs.order_by('-imdb_rating')[:10]
 
     continue_watching = []
     user_watchlist_ids = []
